@@ -58,29 +58,9 @@ func SetUpServer() *gin.Engine {
 	{
 		versionEngine.GET("/products", controller.GetAllProducts)
 		versionEngine.GET("/products/buy/logs", controller.GetBuyLogs)
+		versionEngine.GET("/products/arrive/logs", controller.GetArriveLogs)
 		//versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
 
-		// versionEngine.GET("/stayers", controller.Stayer)
-		// versionEngine.POST("/stayers", controller.Beacon)
-		// versionEngine.GET("/logs", controller.Log)
-		// versionEngine.GET("/logs/gantt", controller.LogGantt)
-		// versionEngine.GET("/users", controller.PastUserList) // 編集機能のフロントのブランチがマージされたら消す
-		// versionEngine.GET("/users/:communityId", controller.UserList)
-		// versionEngine.GET("/users/extended", controller.ExtendedUserList)
-		// versionEngine.POST("/users", controller.CreateUser)
-		// versionEngine.PUT("/users", controller.UpdateUser)
-		// versionEngine.DELETE("/users/:userId", controller.DeleteUser)
-		// versionEngine.GET("/admin/users/:communityId", controller.AdminUserList)
-		// versionEngine.GET("/check", controller.Check)
-		// versionEngine.POST("/attendance", controller.Attendance)
-		// versionEngine.GET("/rooms/:communityID", controller.GetRoomsByCommunityID)
-		// versionEngine.PUT("/rooms", controller.UpdateRoom)
-		// versionEngine.GET("/tags/:communityId/names", controller.GetTagNamesByCommunityId)
-		// versionEngine.GET("/tags/:communityId", controller.GetTagsByCommunityIdHandler)
-		// versionEngine.GET("/beacons", controller.GetBeacon)
-		// versionEngine.GET("/communities/:userId", controller.GetCommunityByUserIdHandler)
-		// versionEngine.GET("/buildings/editor", controller.GetBuildingsEditor)
-		// versionEngine.GET("/signup", controller.SignUp)
 	}
 
 	return engine
@@ -127,4 +107,10 @@ func SetUpDatabase() {
 	db.Create(&model.PaymentProduct{PaymentId: 3, ProductId: 2, Quantity: 1, UnitPrice: 120})
 	db.Create(&model.PaymentProduct{PaymentId: 3, ProductId: 5, Quantity: 1, UnitPrice: 140})
 	db.Create(&model.PaymentProduct{PaymentId: 3, ProductId: 6, Quantity: 1, UnitPrice: 140})
+
+	db.Create(&model.ArrivalProduct{ArrivalId: 1, ProductId: 1, Quantity: 10})
+	db.Create(&model.ArrivalProduct{ArrivalId: 3, ProductId: 2, Quantity: 8})
+	db.Create(&model.ArrivalProduct{ArrivalId: 1, ProductId: 3, Quantity: 12})
+	db.Create(&model.ArrivalProduct{ArrivalId: 1, ProductId: 5, Quantity: 4})
+	db.Create(&model.ArrivalProduct{ArrivalId: 4, ProductId: 2, Quantity: 10})
 }

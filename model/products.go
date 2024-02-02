@@ -25,3 +25,17 @@ type BuyProductResponse struct {
 	Quantity 	int64	`json:"quantity"`
 	UnitPrice	int64	`json:"unit_price"`
 }
+
+type ArriveLogGetResponse struct {
+	Id 			int64					`json:"id"`
+	Money		int64 					`json:"money"`
+	Value 		int64					`json:"value"`
+	ArriveAt	time.Time				`json:"arrive_at"`
+	Products 	[]ArriveProductJson		`json:"products"`
+}
+
+type ArriveProductJson struct {
+	Name 		string 	`json:"name"`
+	Quantity	int64 	`json:"quantity"`
+	Value 		int64 	`json:"value"`
+}

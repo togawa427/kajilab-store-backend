@@ -107,3 +107,61 @@ func GetBuyLogs(c *gin.Context) {
 
 	c.JSON(http.StatusOK, resLogs)
 }
+
+func GetArriveLogs(c *gin.Context){
+	ProductService := service.ProductService{}
+
+	// limitの取得
+	limit, err := strconv.ParseInt(c.Query("limit"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
+		return
+	}
+
+	// 最終的に返す値
+	logsJson := []model.ArriveLogGetResponse{}
+
+	// DBから入荷ログ取得
+	logs, err := ProductService.GetArriveLogs(limit)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get logs from DB")
+		return
+	}
+	for _, log := range logs {
+		totalValue := int64(0)
+
+		// 入荷物の商品情報を取得
+		arriveProducts, err := ProductService.GetArriveProductsByArriveId(int64(log.ID))
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get arrivalproducts from DB")
+			return
+		}
+		arriveProductsJson := []model.ArriveProductJson{}
+		for _, arriveProduct := range arriveProducts {
+
+			// 商品名を取得
+			productInfo, err := ProductService.GetProductById(int64(arriveProduct.ID))
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproduct from DB")
+				return
+			}
+
+			arriveProductsJson = append(arriveProductsJson, model.ArriveProductJson{
+				Name: productInfo.Name,
+				Quantity: arriveProduct.Quantity,
+				Value: productInfo.Price,
+			})
+			totalValue = totalValue + (productInfo.Price*arriveProduct.Quantity)
+		}
+
+		logsJson = append(logsJson, model.ArriveLogGetResponse{
+			Id: int64(log.ID),
+			Money: log.Money,
+			Value: totalValue,
+			ArriveAt: log.ArriveAt,
+			Products: arriveProductsJson,
+		})
+	}
+
+	c.JSON(http.StatusOK, logsJson)
+}

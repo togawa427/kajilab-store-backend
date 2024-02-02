@@ -91,3 +91,36 @@ func (ProductService) GetProductById(id int64) (model.Product, error) {
 	}
 	return product, nil
 }
+
+// 入荷ログを取得
+func (ProductService) GetArriveLogs(limit int64) ([]model.Arrival, error){
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	logs := make([]model.Arrival, 0)
+	result := db.Limit(int(limit)).Find(&logs)
+	if result.Error != nil {
+		fmt.Printf("入荷履歴取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	return logs, nil
+}
+
+// 入荷IDから入荷商品の取得
+func (ProductService) GetArriveProductsByArriveId(arriveId int64) ([]model.ArrivalProduct, error){
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	products := make([]model.ArrivalProduct, 0)
+	result := db.Where("arrival_id = ?", arriveId).Find(&products)
+	if result.Error != nil {
+		fmt.Printf("入荷商品取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	return products, nil
+}
+
