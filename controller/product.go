@@ -53,37 +53,49 @@ func GetAllProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, resProducts)
 }
 
-// func GetTagsByCommunityIdHandler(c *gin.Context) {
-// 	communityId, err := strconv.ParseInt(c.Param("communityId"), 10, 64) // string -> int64
-// 	if err != nil {
-// 		c.AbortWithStatusJSON(http.StatusBadRequest, "Type is not number")
-// 	}
+func GetBuyLogs(c *gin.Context) {
+	ProductService := service.ProductService{}
 
-// 	TagService := service.TagService{}
+	// limitの取得
+	limit, err := strconv.ParseInt(c.Query("limit"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
+		return
+	}
 
-// 	// DBからどこのコミュニティにも該当するタグを持ってくる
-// 	publicTags, err := TagService.GetTagsByCommunityId(-1)
-// 	if err != nil {
-// 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to get public tags"})
-// 		return
-// 	}
-// 	// DBからコミュニティのタグネームを持ってくる
-// 	communityTags, err := TagService.GetTagsByCommunityId(communityId)
-// 	if err != nil {
-// 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to get private tags"})
-// 		return
-// 	}
-// 	tags := append(publicTags, communityTags...)
+	// DBから購入ログ取得
+	logs, err := ProductService.GetBuyLogs(limit)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get logs from DB")
+		return
+	}
 
-// 	tagsResponse := []model.TagsGetResponse{}
+	// DBから購入物取得
+	buyProducts, err := ProductService.GetBuyProducts()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproducts from DB")
+		return
+	}
 
-// 	for _, tag := range tags {
+	resBuyProducts := []model.BuyProductResponse{}
+	for _, buyProduct := range buyProducts {
+		resBuyProducts = append(resBuyProducts, model.BuyProductResponse{
+			Name: "じゃがりこ",
+			Quantity: buyProduct.Quantity,
+			UnitPrice: buyProduct.UnitPrice,
+		})
+	}
 
-// 		tagsResponse = append(tagsResponse, model.TagsGetResponse{
-// 			Id:   int64(tag.ID),
-// 			Name: tag.Name,
-// 		})
-// 	}
+	resLogs := []model.BuyLogsGetResponse{}
+	for _, log := range logs {
+		resLogs = append(resLogs, model.BuyLogsGetResponse{
+			Id: int64(log.ID),
+			Price: log.Price,
+			PayAt: log.PayAt,
+			Method: log.Method,
+			Products: resBuyProducts,
+		})
+	}
 
-// 	c.JSON(http.StatusOK, tagsResponse)
-// }
+	c.JSON(http.StatusOK, resLogs)
+}

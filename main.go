@@ -57,6 +57,7 @@ func SetUpServer() *gin.Engine {
 	versionEngine := engine.Group("api/v1")
 	{
 		versionEngine.GET("/products", controller.GetAllProducts)
+		versionEngine.GET("/products/buy/logs", controller.GetBuyLogs)
 		//versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
 
 		// versionEngine.GET("/stayers", controller.Stayer)
@@ -108,5 +109,17 @@ func SetUpDatabase() {
 	db.Create(&model.Product{Name: "ごつもりソース味", Barcode: 134912341221, Price: 140, Stock: 11, TagId: 2, ImagePath: "public/images/jagariko.jpg"})
 	db.Create(&model.Product{Name: "ごつもり塩味", Barcode: 134912341222, Price: 140, Stock: 10, TagId: 2, ImagePath: "public/images/jagariko.jpg"})
 
-	
+	db.Create(&model.Payment{Price: 240, PayAt: time.Now(), Method: "cash"})
+	db.Create(&model.Payment{Price: 120, PayAt: time.Now(), Method: "cash"})
+	db.Create(&model.Payment{Price: 300, PayAt: time.Now(), Method: "cash"})
+	db.Create(&model.Payment{Price: 240, PayAt: time.Now(), Method: "cash"})
+	db.Create(&model.Payment{Price: 300, PayAt: time.Now(), Method: "cash"})
+	db.Create(&model.Payment{Price: 140, PayAt: time.Now(), Method: "cash"})
+
+	db.Create(&model.Arrival{Money: 2400, ArriveAt: time.Now()})
+	db.Create(&model.Arrival{Money: 1231, ArriveAt: time.Now()})
+	db.Create(&model.Arrival{Money: 413, ArriveAt: time.Now()})
+	db.Create(&model.Arrival{Money: 2234, ArriveAt: time.Now()})
+	db.Create(&model.Arrival{Money: 1231, ArriveAt: time.Now()})
+	db.Create(&model.Arrival{Money: 1941, ArriveAt: time.Now()})
 }
