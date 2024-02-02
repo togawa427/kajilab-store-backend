@@ -12,6 +12,7 @@ type Product struct {
 	Barcode   	int64
 	Price 		int64
 	Stock		int64
+	TagId		int64
 	ImagePath	string
 }
 

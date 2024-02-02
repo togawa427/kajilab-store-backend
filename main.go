@@ -101,12 +101,12 @@ func SetUpDatabase() {
 	db.AutoMigrate(&model.ArrivalProduct{})
 
 	// サンプルデータの挿入
-	db.Create(&model.Product{Name: "じゃがりこサラダ味", Barcode: 134912341234, Price: 120, Stock: 9, ImagePath: "public/images/jagariko.jpg"})
-	db.Create(&model.Product{Name: "じゃがりこチーズ味", Barcode: 134912341233, Price: 120, Stock: 4, ImagePath: "public/images/jagariko.jpg"})
-	db.Create(&model.Product{Name: "じゃがりこたらこ味", Barcode: 134912341232, Price: 120, Stock: 5, ImagePath: "public/images/jagariko.jpg"})
-	db.Create(&model.Product{Name: "じゃがりこじゃがバター味", Barcode: 134912341231, Price: 120, Stock: 9, ImagePath: "public/images/jagariko.jpg"})
-	db.Create(&model.Product{Name: "ごつもりソース味", Barcode: 134912341221, Price: 140, Stock: 11, ImagePath: "public/images/jagariko.jpg"})
-	db.Create(&model.Product{Name: "ごつもり塩味", Barcode: 134912341222, Price: 140, Stock: 10, ImagePath: "public/images/jagariko.jpg"})
+	db.Create(&model.Product{Name: "じゃがりこサラダ味", Barcode: 134912341234, Price: 120, Stock: 9, TagId: 1, ImagePath: "public/images/jagariko.jpg"})
+	db.Create(&model.Product{Name: "じゃがりこチーズ味", Barcode: 134912341233, Price: 120, Stock: 4, TagId: 1, ImagePath: "public/images/jagariko.jpg"})
+	db.Create(&model.Product{Name: "じゃがりこたらこ味", Barcode: 134912341232, Price: 120, Stock: 5, TagId: 1, ImagePath: "public/images/jagariko.jpg"})
+	db.Create(&model.Product{Name: "じゃがりこじゃがバター味", Barcode: 134912341231, Price: 120, Stock: 9, TagId: 1, ImagePath: "public/images/jagariko.jpg"})
+	db.Create(&model.Product{Name: "ごつもりソース味", Barcode: 134912341221, Price: 140, Stock: 11, TagId: 2, ImagePath: "public/images/jagariko.jpg"})
+	db.Create(&model.Product{Name: "ごつもり塩味", Barcode: 134912341222, Price: 140, Stock: 10, TagId: 2, ImagePath: "public/images/jagariko.jpg"})
 
 	
 }

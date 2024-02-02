@@ -6,5 +6,6 @@ type AllProductsGetResponse struct {
 	Barcode   	int64 	`json:"barcode"`
 	Price 		int64  	`json:"price"`
 	Stock		int64	`json:"stock"`
+	TagId 		int64 	`json:"tag_id"`
 	ImagePath	string	`json:"image_path"`
 }
