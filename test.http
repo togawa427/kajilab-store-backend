@@ -1,0 +1,4 @@
+@baseURL= http://localhost:8080
+
+###
+Get {{baseURL}}/api/v1/products?limit=10&&offset=9
