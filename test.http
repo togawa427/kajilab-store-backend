@@ -4,4 +4,4 @@
 Get {{baseURL}}/api/v1/products?limit=5&&offset=2
 
 ###
-Get {{baseURL}}/api/v1/products/buy/logs?limit=5
+Get {{baseURL}}/api/v1/products/buy/logs?limit=3

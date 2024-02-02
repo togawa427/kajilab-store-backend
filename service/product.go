@@ -45,6 +45,21 @@ func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
 	return logs, nil
 }
 
+func (ProductService) GetBuyProductsByPaymentId(paymentId int64) ([]model.PaymentProduct, error){
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	products := make([]model.PaymentProduct, 0)
+	result := db.Where("payment_id = ?", paymentId).Find(&products)
+	if result.Error != nil {
+		fmt.Printf("購入物取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	return products, nil
+}
+
 // 購入物を取得
 func (ProductService) GetBuyProducts() ([]model.PaymentProduct, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
@@ -59,4 +74,20 @@ func (ProductService) GetBuyProducts() ([]model.PaymentProduct, error){
 		return nil, result.Error
 	}
 	return products, nil
+}
+
+// IDから商品情報を取得
+func (ProductService) GetProductById(id int64) (model.Product, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var product model.Product
+	result := db.First(&product, id)
+	if result.Error != nil {
+		fmt.Printf("購入物取得失敗 %v", result.Error)
+		return product, result.Error
+	}
+	return product, nil
 }

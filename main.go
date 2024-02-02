@@ -111,9 +111,9 @@ func SetUpDatabase() {
 
 	db.Create(&model.Payment{Price: 240, PayAt: time.Now(), Method: "cash"})
 	db.Create(&model.Payment{Price: 120, PayAt: time.Now(), Method: "cash"})
-	db.Create(&model.Payment{Price: 300, PayAt: time.Now(), Method: "cash"})
+	db.Create(&model.Payment{Price: 400, PayAt: time.Now(), Method: "cash"})
 	db.Create(&model.Payment{Price: 240, PayAt: time.Now(), Method: "cash"})
-	db.Create(&model.Payment{Price: 300, PayAt: time.Now(), Method: "cash"})
+	db.Create(&model.Payment{Price: 400, PayAt: time.Now(), Method: "cash"})
 	db.Create(&model.Payment{Price: 140, PayAt: time.Now(), Method: "cash"})
 
 	db.Create(&model.Arrival{Money: 2400, ArriveAt: time.Now()})
@@ -122,4 +122,9 @@ func SetUpDatabase() {
 	db.Create(&model.Arrival{Money: 2234, ArriveAt: time.Now()})
 	db.Create(&model.Arrival{Money: 1231, ArriveAt: time.Now()})
 	db.Create(&model.Arrival{Money: 1941, ArriveAt: time.Now()})
+
+	db.Create(&model.PaymentProduct{PaymentId: 1, ProductId: 1, Quantity: 2, UnitPrice: 120})
+	db.Create(&model.PaymentProduct{PaymentId: 3, ProductId: 2, Quantity: 1, UnitPrice: 120})
+	db.Create(&model.PaymentProduct{PaymentId: 3, ProductId: 5, Quantity: 1, UnitPrice: 140})
+	db.Create(&model.PaymentProduct{PaymentId: 3, ProductId: 6, Quantity: 1, UnitPrice: 140})
 }

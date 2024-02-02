@@ -70,30 +70,38 @@ func GetBuyLogs(c *gin.Context) {
 		return
 	}
 
-	// DBから購入物取得
-	buyProducts, err := ProductService.GetBuyProducts()
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproducts from DB")
-		return
-	}
-
-	resBuyProducts := []model.BuyProductResponse{}
-	for _, buyProduct := range buyProducts {
-		resBuyProducts = append(resBuyProducts, model.BuyProductResponse{
-			Name: "じゃがりこ",
-			Quantity: buyProduct.Quantity,
-			UnitPrice: buyProduct.UnitPrice,
-		})
-	}
-
 	resLogs := []model.BuyLogsGetResponse{}
 	for _, log := range logs {
+
+		// 購入物の商品情報を取得
+		buyProducts, err := ProductService.GetBuyProductsByPaymentId(int64(log.ID))
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproducts from DB")
+			return
+		}
+		buyProductsJson := []model.BuyProductResponse{}
+		for _, buyProduct := range buyProducts {
+
+			// 商品名を取得
+			productInfo, err := ProductService.GetProductById(int64(buyProduct.ID))
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproduct from DB")
+				return
+			}
+
+			buyProductsJson = append(buyProductsJson, model.BuyProductResponse{
+				Name: productInfo.Name,
+				Quantity: buyProduct.Quantity,
+				UnitPrice: buyProduct.UnitPrice,
+			})
+		}
+
 		resLogs = append(resLogs, model.BuyLogsGetResponse{
 			Id: int64(log.ID),
 			Price: log.Price,
 			PayAt: log.PayAt,
 			Method: log.Method,
-			Products: resBuyProducts,
+			Products: buyProductsJson,
 		})
 	}
 
