@@ -40,3 +40,10 @@ type ArriveProductJson struct {
 	Quantity	int64 	`json:"quantity"`
 	Value 		int64 	`json:"value"`
 }
+
+type ProductCreateRequest struct {
+	Name   		string 	`json:"name"`
+	Barcode   	int64 	`json:"barcode"`
+	Price 		int64  	`json:"price"`
+	TagId 		int64 	`json:"tag_id"`
+}

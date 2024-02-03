@@ -166,3 +166,32 @@ func GetArriveLogs(c *gin.Context){
 
 	c.JSON(http.StatusOK, logsJson)
 }
+
+func CreateProduct(c *gin.Context){
+	ProductService := service.ProductService{}
+	ProductCreateRequest := model.ProductCreateRequest{}
+	err := c.Bind(&ProductCreateRequest)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// リクエストの商品情報をデータベースの型へ変換
+	product := model.Product{
+		Name: ProductCreateRequest.Name,
+		Barcode: ProductCreateRequest.Barcode,
+		Price: ProductCreateRequest.Price,
+		Stock: 0,
+		TagId: ProductCreateRequest.TagId,
+		ImagePath: strconv.Itoa(int(ProductCreateRequest.Barcode))+ ".jpg",
+	}
+
+	err = ProductService.CreateProduct(&product)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create product")
+		return
+	}
+
+	c.JSON(http.StatusOK, "success")
+
+}

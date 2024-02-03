@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"kajilab-store-backend/model"
 	"os"
@@ -16,6 +17,7 @@ func (ProductService) GetAllProducts(limit int64, offset int64) ([]model.Product
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
+		return nil, err
 	}
 
 	products := make([]model.Product, 0)
@@ -33,6 +35,7 @@ func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
+		return nil, err
 	}
 
 	logs := make([]model.Payment, 0)
@@ -49,6 +52,7 @@ func (ProductService) GetBuyProductsByPaymentId(paymentId int64) ([]model.Paymen
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
+		return nil, err
 	}
 
 	products := make([]model.PaymentProduct, 0)
@@ -65,6 +69,7 @@ func (ProductService) GetBuyProducts() ([]model.PaymentProduct, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
+		return nil, err
 	}
 
 	products := make([]model.PaymentProduct, 0)
@@ -81,6 +86,7 @@ func (ProductService) GetProductById(id int64) (model.Product, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
+		return model.Product{}, err
 	}
 
 	var product model.Product
@@ -97,6 +103,7 @@ func (ProductService) GetArriveLogs(limit int64) ([]model.Arrival, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
+		return nil, err
 	}
 
 	logs := make([]model.Arrival, 0)
@@ -113,6 +120,7 @@ func (ProductService) GetArriveProductsByArriveId(arriveId int64) ([]model.Arriv
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
+		return nil, err
 	}
 
 	products := make([]model.ArrivalProduct, 0)
@@ -124,3 +132,28 @@ func (ProductService) GetArriveProductsByArriveId(arriveId int64) ([]model.Arriv
 	return products, nil
 }
 
+// 商品情報を登録
+func (ProductService) CreateProduct(product *model.Product) error {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// バーコードのかぶりチェック
+	existProduct := model.Product{}
+	result := db.Where("barcode = ?", product.Barcode).First(&existProduct)
+	if result.Error == nil {
+		err := errors.New("the barcode is existing")
+		fmt.Printf("%v",err)
+		return err
+	}
+
+	// 商品をDBへ登録
+	result = db.Create(product)
+	if result.Error != nil {
+		fmt.Printf("入荷登録失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

@@ -1,10 +1,21 @@
 @baseURL= http://localhost:8080
 
 ###
-Get {{baseURL}}/api/v1/products?limit=5&&offset=2
+Get {{baseURL}}/api/v1/products?limit=10&&offset=2
 
 ###
 Get {{baseURL}}/api/v1/products/buy/logs?limit=3
 
 ###
 Get {{baseURL}}/api/v1/products/arrive/logs?limit=3
+
+###
+POST {{baseURL}}/api/v1/products HTTP/1.1
+Content-Type: application/json
+
+{
+    "name":"じゃがりこ関西だし味",
+    "barcode":123456788,
+    "price":220,
+    "tag_id":1
+}
