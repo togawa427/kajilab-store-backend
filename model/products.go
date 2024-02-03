@@ -17,6 +17,7 @@ type BuyLogsGetResponse struct {
 	Price 		int64  					`json:"price"`
 	PayAt 		time.Time				`json:"pay_at"`
 	Method 		string					`json:"method"`
+	UserName 	string 					`json:"user_name"`
 	Products 	[]BuyProductResponse	`json:"products"`
 }
 

@@ -101,6 +101,7 @@ func GetBuyLogs(c *gin.Context) {
 			Price: log.Price,
 			PayAt: log.PayAt,
 			Method: log.Method,
+			UserName: "",
 			Products: buyProductsJson,
 		})
 	}

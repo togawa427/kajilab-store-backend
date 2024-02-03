@@ -27,6 +27,7 @@ type Payment struct {
 	Price		int64
 	PayAt 		time.Time
 	Method		string
+	UserId 		int64
 }
 
 type PaymentProduct struct {
