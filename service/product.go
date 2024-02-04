@@ -157,3 +157,37 @@ func (ProductService) CreateProduct(product *model.Product) error {
 	}
 	return nil
 }
+
+// 購入情報を登録
+func (ProductService) CreatePayment(payment *model.Payment) (int64, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return 0,err
+	}
+
+	// 購入情報をDBへ登録
+	result := db.Create(payment)
+	if result.Error != nil {
+		fmt.Printf("購入情報登録失敗 %v", result.Error)
+		return 0,result.Error
+	}
+	return int64(payment.ID),nil
+}
+
+// 購入した商品の情報を登録
+func (ProductService) CreatePaymentProduct(payment *model.PaymentProduct) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 購入商品をDBへ保存
+	result := db.Create(payment)
+	if result.Error != nil {
+		fmt.Printf("購入商品登録失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

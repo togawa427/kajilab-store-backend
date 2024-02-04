@@ -22,7 +22,9 @@ type BuyLogsGetResponse struct {
 }
 
 type BuyProductResponse struct {
+	Id 			int64 	`json:"id"`
 	Name		string	`json:"name"`
+	Barcode 	int64 	`json:"barcode"`
 	Quantity 	int64	`json:"quantity"`
 	UnitPrice	int64	`json:"unit_price"`
 }
@@ -36,14 +38,29 @@ type ArriveLogGetResponse struct {
 }
 
 type ArriveProductJson struct {
+	Id 			int64 	`json:"id"`
 	Name 		string 	`json:"name"`
+	Barcode 	int64 	`json:"barcode"`
 	Quantity	int64 	`json:"quantity"`
 	Value 		int64 	`json:"value"`
 }
 
 type ProductCreateRequest struct {
 	Name   		string 	`json:"name"`
-	Barcode   	int64 	`json:"barcode"`
+	Barcode 	int64 	`json:"barcode"`
 	Price 		int64  	`json:"price"`
 	TagId 		int64 	`json:"tag_id"`
+}
+
+type ProductsBuyRequest struct {
+	PayAt 			time.Time			`json:"pay_at"`
+	Method 			string 				`json:"method"`
+	UserNumber 		string				`json:"user_number"`
+	Products 		[]ProductBuyJson 	`json:"products"`
+}
+
+type ProductBuyJson struct {
+	Id 		 	int64 	`json:"id"`
+	Quantity	int64 	`json:"quantity"`
+	UnitPrice 	int64 	`json:"unit_price"`
 }

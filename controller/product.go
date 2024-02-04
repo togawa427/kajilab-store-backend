@@ -4,6 +4,7 @@ import (
 
 	// "kajilab-store-backend/service"
 
+	"fmt"
 	"kajilab-store-backend/model"
 	"kajilab-store-backend/service"
 	"net/http"
@@ -53,6 +54,7 @@ func GetAllProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, resProducts)
 }
 
+// 購入ログの取得
 func GetBuyLogs(c *gin.Context) {
 	ProductService := service.ProductService{}
 
@@ -83,14 +85,16 @@ func GetBuyLogs(c *gin.Context) {
 		for _, buyProduct := range buyProducts {
 
 			// 商品名を取得
-			productInfo, err := ProductService.GetProductById(int64(buyProduct.ID))
+			productInfo, err := ProductService.GetProductById(int64(buyProduct.ProductId))
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproduct from DB")
 				return
 			}
 
 			buyProductsJson = append(buyProductsJson, model.BuyProductResponse{
+				Id: int64(productInfo.ID),
 				Name: productInfo.Name,
+				Barcode: productInfo.Barcode,
 				Quantity: buyProduct.Quantity,
 				UnitPrice: buyProduct.UnitPrice,
 			})
@@ -109,6 +113,7 @@ func GetBuyLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, resLogs)
 }
 
+// 入荷ログ取得API
 func GetArriveLogs(c *gin.Context){
 	ProductService := service.ProductService{}
 
@@ -141,14 +146,16 @@ func GetArriveLogs(c *gin.Context){
 		for _, arriveProduct := range arriveProducts {
 
 			// 商品名を取得
-			productInfo, err := ProductService.GetProductById(int64(arriveProduct.ID))
+			productInfo, err := ProductService.GetProductById(int64(arriveProduct.ProductId))
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproduct from DB")
 				return
 			}
 
 			arriveProductsJson = append(arriveProductsJson, model.ArriveProductJson{
+				Id: int64(productInfo.ID,),
 				Name: productInfo.Name,
+				Barcode: int64(productInfo.Barcode),
 				Quantity: arriveProduct.Quantity,
 				Value: productInfo.Price,
 			})
@@ -167,6 +174,7 @@ func GetArriveLogs(c *gin.Context){
 	c.JSON(http.StatusOK, logsJson)
 }
 
+// 商品登録API
 func CreateProduct(c *gin.Context){
 	ProductService := service.ProductService{}
 	ProductCreateRequest := model.ProductCreateRequest{}
@@ -189,6 +197,75 @@ func CreateProduct(c *gin.Context){
 	err = ProductService.CreateProduct(&product)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create product")
+		return
+	}
+
+	c.JSON(http.StatusOK, "success")
+
+}
+
+// 商品購入時API
+func BuyProducts(c *gin.Context) {
+	ProductService := service.ProductService{}
+	AssetService := service.AssetService{}
+	ProductsBuyRequest := model.ProductsBuyRequest{}
+	err := c.Bind(&ProductsBuyRequest)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// 合計金額を算出
+	totalPrice := int64(0)
+	productsJson := ProductsBuyRequest.Products
+	for _, productJson := range productsJson {
+		totalPrice += productJson.UnitPrice * productJson.Quantity
+	}
+
+	// ユーザ番号からユーザIDを取得
+	// 未実装
+
+	// 購入情報を登録
+	// リクエストの商品情報をデータベースの型へ変換
+	payment := model.Payment{
+		Price: totalPrice,
+		PayAt: ProductsBuyRequest.PayAt,
+		Method: ProductsBuyRequest.Method,
+		UserId: 0,
+	}
+	// DBへ保存
+	paymentId, err := ProductService.CreatePayment(&payment)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create payment")
+		return
+	}
+
+	fmt.Println(paymentId)
+
+
+	// 購入商品情報を登録
+	for _, productJson := range productsJson {
+		fmt.Println("start")
+		// リクエストの商品情報をデータベースの型へ変換
+		product := model.PaymentProduct{
+			PaymentId: paymentId,
+			ProductId: productJson.Id,
+			Quantity: productJson.Quantity,
+			UnitPrice: productJson.UnitPrice,
+		}
+		// DBへ保存
+		err = ProductService.CreatePaymentProduct(&product)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create payment_product")
+			return
+		}	
+	}
+
+	// お金を減らす
+	err = AssetService.IncreaseMoney(0-totalPrice)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
 		return
 	}
 

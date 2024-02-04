@@ -60,6 +60,7 @@ func SetUpServer() *gin.Engine {
 		versionEngine.GET("/products/buy/logs", controller.GetBuyLogs)
 		versionEngine.GET("/products/arrive/logs", controller.GetArriveLogs)
 		versionEngine.POST("/products", controller.CreateProduct)
+		versionEngine.POST("/products/buy", controller.BuyProducts)
 		//versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
 
 	}
@@ -114,4 +115,6 @@ func SetUpDatabase() {
 	db.Create(&model.ArrivalProduct{ArrivalId: 1, ProductId: 3, Quantity: 12})
 	db.Create(&model.ArrivalProduct{ArrivalId: 1, ProductId: 5, Quantity: 4})
 	db.Create(&model.ArrivalProduct{ArrivalId: 4, ProductId: 2, Quantity: 10})
+
+	db.Create(&model.Asset{Money: 10000, Debt: 0})
 }
