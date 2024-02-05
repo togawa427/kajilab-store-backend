@@ -266,3 +266,27 @@ func (ProductService) DeletePayment(id int64) (error) {
 	}
 	return nil
 }
+
+// 入荷情報の削除
+func (ProductService) DeleteArrival(id int64) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 入荷情報をDBから削除
+	result := db.Delete(&model.Arrival{}, id)
+	if result.Error != nil {
+		fmt.Printf("入荷情報削除失敗 %v", result.Error)
+		return result.Error
+	}
+
+	// 入荷商品情報をDBから削除
+	result = db.Where("arrival_id LIKE ?", id).Delete(&model.ArrivalProduct{})
+	if result.Error != nil {
+		fmt.Printf("入荷商品情報削除失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

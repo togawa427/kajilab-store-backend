@@ -77,4 +77,7 @@ Content-Type: application/json
 ###
 DELETE {{baseURL}}/api/v1/products/buy/11
 
+###
+DELETE {{baseURL}}/api/v1/products/arrival/8
+
 # カンマの有無でエラー:invalid character '}' looking for beginning of object key stringがでるため注意
