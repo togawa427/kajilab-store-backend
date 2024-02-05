@@ -80,4 +80,7 @@ DELETE {{baseURL}}/api/v1/products/buy/11
 ###
 DELETE {{baseURL}}/api/v1/products/arrival/8
 
+###
+GET {{baseURL}}/api/v1/assets
+
 # カンマの有無でエラー:invalid character '}' looking for beginning of object key stringがでるため注意

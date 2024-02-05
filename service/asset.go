@@ -36,3 +36,22 @@ func (AssetService) IncreaseMoney(money int64) (error) {
 	}
 	return nil
 }
+
+// 現在の予算を取得
+func (AssetService) GetAsset() (model.Asset, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return model.Asset{}, err
+	}
+
+	// 現在の予算をDBから取得
+	asset := model.Asset{}
+	result := db.First(&asset)
+	if result.Error != nil {
+		fmt.Printf("財産取得失敗 %v", result.Error)
+		return model.Asset{}, result.Error
+	}
+
+	return asset, nil
+}

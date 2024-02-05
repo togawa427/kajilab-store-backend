@@ -56,6 +56,7 @@ func SetUpServer() *gin.Engine {
 
 	versionEngine := engine.Group("api/v1")
 	{
+		// products
 		versionEngine.GET("/products", controller.GetAllProducts)
 		versionEngine.GET("/products/buy/logs", controller.GetBuyLogs)
 		versionEngine.GET("/products/arrive/logs", controller.GetArriveLogs)
@@ -65,6 +66,10 @@ func SetUpServer() *gin.Engine {
 		versionEngine.PUT("/products", controller.UpdateProduct)
 		versionEngine.DELETE("/products/buy/:paymentId", controller.DeletePayment)
 		versionEngine.DELETE("/products/arrival/:arrivalId", controller.DeleteArrival)
+
+		// assets
+		versionEngine.GET("/assets", controller.GetAsset)
+
 		//versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
 
 	}
