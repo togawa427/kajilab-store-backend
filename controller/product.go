@@ -324,3 +324,33 @@ func ArriveProducts(c *gin.Context) {
 
 	c.JSON(http.StatusOK, "success")
 }
+
+// 商品情報更新API
+func UpdateProduct(c *gin.Context) {
+	ProductService := service.ProductService{}
+	ProductUpdateRequest := model.ProductUpdateRequest{}
+	err := c.Bind(&ProductUpdateRequest)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// 商品情報更新
+	// リクエストの商品情報をデータベースの型へ変換
+	product := model.Product{
+		Name: ProductUpdateRequest.Name,
+		Barcode: ProductUpdateRequest.Barcode,
+		Price: ProductUpdateRequest.Price,
+		Stock: ProductUpdateRequest.Stock,
+		TagId: ProductUpdateRequest.TagId,
+	}
+	// DBへ保存
+	err = ProductService.UpdateProduct(ProductUpdateRequest.Id, &product)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update product")
+		return
+	}
+
+	c.JSON(http.StatusOK, "success")
+}

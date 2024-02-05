@@ -225,3 +225,20 @@ func (ProductService) CreateArriveProduct(arriveProduct *model.ArrivalProduct) (
 	}
 	return nil
 }
+
+// 商品情報の更新
+func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 商品情報をDBへ登録
+	result := db.Model(&model.Product{}).Where("id = ?", id).Updates(&product)
+	if result.Error != nil {
+		fmt.Printf("商品情報更新失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

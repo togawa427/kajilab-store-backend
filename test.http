@@ -1,7 +1,7 @@
 @baseURL= http://localhost:8080
 
 ###
-Get {{baseURL}}/api/v1/products?limit=10&&offset=2
+Get {{baseURL}}/api/v1/products?limit=10&&offset=0
 
 ###
 Get {{baseURL}}/api/v1/products/buy/logs?limit=10
@@ -59,6 +59,19 @@ Content-Type: application/json
             "quantity": 3
         }
     ]
+}
+
+###
+PUT {{baseURL}}/api/v1/products
+Content-Type: application/json
+
+{
+    "id":11,
+    "name": "じゃがりこちーーず味",
+    "barcode":1234567891021,
+    "price":130,
+    "stock":11,
+    "tag_id":2
 }
 
 # カンマの有無でエラー:invalid character '}' looking for beginning of object key stringがでるため注意

@@ -75,3 +75,12 @@ type ProductArriveJson struct {
 	Id 			int64 	`json:"id"`
 	Quantity	int64	`json:"quantity"`
 }
+
+type ProductUpdateRequest struct {
+	Id 			int64 	`json:"id"`
+	Name   		string 	`json:"name"`
+	Barcode 	int64 	`json:"barcode"`
+	Price 		int64  	`json:"price"`
+	Stock 		int64 	`json:"stock"`
+	TagId 		int64 	`json:"tag_id"`
+}
