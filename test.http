@@ -48,11 +48,11 @@ Content-Type: application/json
 
 {
     "arrive_at": "2024-02-06T23:32:37.115934+09:00",
-    "money": 201,
+    "money": 2010,
     "products": [
         {
             "id": 2,
-            "quantity": 1
+            "quantity": 10
         },
         {
             "id": 3,
@@ -75,12 +75,21 @@ Content-Type: application/json
 }
 
 ###
-DELETE {{baseURL}}/api/v1/products/buy/11
+DELETE {{baseURL}}/api/v1/products/buy/16
 
 ###
-DELETE {{baseURL}}/api/v1/products/arrival/8
+DELETE {{baseURL}}/api/v1/products/arrival/10
 
 ###
 GET {{baseURL}}/api/v1/assets
+
+###
+PUT {{baseURL}}/api/v1/assets
+Content-Type: application/json
+
+{
+    "money":29292,
+    "debt": 100
+}
 
 # カンマの有無でエラー:invalid character '}' looking for beginning of object key stringがでるため注意

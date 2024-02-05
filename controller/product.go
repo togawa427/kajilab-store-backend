@@ -358,10 +358,18 @@ func UpdateProduct(c *gin.Context) {
 // 購入情報削除API
 func DeletePayment(c *gin.Context) {
 	ProductService := service.ProductService{}
+	AssetService := service.AssetService{}
 	paymentId, err := strconv.ParseInt(c.Param("paymentId"), 10, 64)
 	if err != nil {
 		fmt.Println(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// 購入情報取得
+	payment, err := ProductService.GetPaymentById(paymentId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get payment")
 		return
 	}
 
@@ -373,16 +381,31 @@ func DeletePayment(c *gin.Context) {
 		return
 	}
 
+	// お金を減らす
+	err = AssetService.IncreaseMoney(0-payment.Price)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
+		return
+	}
+
 	c.JSON(http.StatusOK, "success")
 }
 
 // 入荷情報削除API
 func DeleteArrival(c *gin.Context) {
 	ProductService := service.ProductService{}
+	AssetService := service.AssetService{}
 	arrivalId, err := strconv.ParseInt(c.Param("arrivalId"), 10, 64)
 	if err != nil {
 		fmt.Println(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// 入荷情報取得
+	arrival, err := ProductService.GetArrivalById(arrivalId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get arrival")
 		return
 	}
 
@@ -391,6 +414,13 @@ func DeleteArrival(c *gin.Context) {
 	err = ProductService.DeleteArrival(arrivalId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal delete arrival")
+		return
+	}
+
+	// お金を増やす
+	err = AssetService.IncreaseMoney(arrival.Money)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase money")
 		return
 	}
 

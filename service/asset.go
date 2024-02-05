@@ -55,3 +55,20 @@ func (AssetService) GetAsset() (model.Asset, error) {
 
 	return asset, nil
 }
+
+// 財産を更新する
+func (AssetService) UpdateAsset(asset *model.Asset) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 財産情報をDBへ登録
+	result := db.Model(&model.Asset{}).Where("id = ?", 1).Updates(&asset)
+	if result.Error != nil {
+		fmt.Printf("商品情報更新失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

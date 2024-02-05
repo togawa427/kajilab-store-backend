@@ -132,6 +132,40 @@ func (ProductService) GetArriveProductsByArriveId(arriveId int64) ([]model.Arriv
 	return products, nil
 }
 
+// 購入情報を取得
+func (ProductService) GetPaymentById(id int64) (model.Payment, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return model.Payment{}, err
+	}
+
+	payment := model.Payment{}
+	result := db.First(&payment, id)
+	if result.Error != nil {
+		fmt.Printf("入荷商品取得失敗 %v", result.Error)
+		return payment, result.Error
+	}
+	return payment, nil
+}
+
+// 入荷情報を取得
+func (ProductService) GetArrivalById(id int64) (model.Arrival, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return model.Arrival{}, err
+	}
+
+	arrival := model.Arrival{}
+	result := db.First(&arrival, id)
+	if result.Error != nil {
+		fmt.Printf("入荷商品取得失敗 %v", result.Error)
+		return arrival, result.Error
+	}
+	return arrival, nil
+}
+
 // 商品情報を登録
 func (ProductService) CreateProduct(product *model.Product) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
@@ -243,7 +277,7 @@ func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
 	return nil
 }
 
-// 購入情報の削除
+// 購入情報の削除(お金返す)
 func (ProductService) DeletePayment(id int64) (error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
@@ -264,6 +298,7 @@ func (ProductService) DeletePayment(id int64) (error) {
 		fmt.Printf("購入商品情報削除失敗 %v", result.Error)
 		return result.Error
 	}
+
 	return nil
 }
 

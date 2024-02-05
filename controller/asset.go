@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"kajilab-store-backend/model"
 	"kajilab-store-backend/service"
 	"net/http"
@@ -25,4 +26,30 @@ func GetAsset(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, jsonAsset)
+}
+
+func UpdateAsset(c *gin.Context) {
+	AssetService := service.AssetService{}
+	AssetUpdateRequest := model.AssetUpdateRequest{}
+	err := c.Bind(&AssetUpdateRequest)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// 財産情報更新
+	// リクエストの財産情報をデータベースの型へ変換
+	asset := model.Asset{
+		Money: AssetUpdateRequest.Money,
+		Debt: AssetUpdateRequest.Debt,
+	}
+	// DBへ保存
+	err = AssetService.UpdateAsset(&asset)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update product")
+		return
+	}
+
+	c.JSON(http.StatusOK, "success")
 }

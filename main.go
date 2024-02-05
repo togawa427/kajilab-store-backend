@@ -69,6 +69,7 @@ func SetUpServer() *gin.Engine {
 
 		// assets
 		versionEngine.GET("/assets", controller.GetAsset)
+		versionEngine.PUT("/assets", controller.UpdateAsset)
 
 		//versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
 
