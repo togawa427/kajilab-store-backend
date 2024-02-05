@@ -263,12 +263,64 @@ func BuyProducts(c *gin.Context) {
 	}
 
 	// お金を減らす
-	err = AssetService.IncreaseMoney(0-totalPrice)
+	err = AssetService.IncreaseMoney(totalPrice)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase money")
+		return
+	}
+
+	c.JSON(http.StatusOK, "success")
+
+}
+
+// 商品入荷API
+func ArriveProducts(c *gin.Context) {
+	ProductService := service.ProductService{}
+	AssetService := service.AssetService{}
+	ProductsArriveRequest := model.ProductsArriveRequest{}
+	err := c.Bind(&ProductsArriveRequest)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// 購入情報を登録
+	// リクエストの商品情報をデータベースの型へ変換
+	arrival := model.Arrival{
+		Money: ProductsArriveRequest.Money,
+		ArriveAt: ProductsArriveRequest.ArriveAt,
+	}
+	// DBへ保存
+	arrivalId, err := ProductService.CreateArrival(&arrival)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create arrival")
+		return
+	}
+
+	// 入荷商品情報を登録
+	productsJson := ProductsArriveRequest.Products
+	for _, productJson := range productsJson {
+		// リクエストの商品情報をデータベースの型へ変換
+		product := model.ArrivalProduct{
+			ArrivalId: arrivalId,
+			ProductId: productJson.Id,
+			Quantity: productJson.Quantity,
+		}
+		// DBへ保存
+		err = ProductService.CreateArriveProduct(&product)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create arrival_product")
+			return
+		}	
+	}
+
+	// お金を減らす
+	err = AssetService.IncreaseMoney(0-ProductsArriveRequest.Money)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
 		return
 	}
 
 	c.JSON(http.StatusOK, "success")
-
 }

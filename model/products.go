@@ -64,3 +64,14 @@ type ProductBuyJson struct {
 	Quantity	int64 	`json:"quantity"`
 	UnitPrice 	int64 	`json:"unit_price"`
 }
+
+type ProductsArriveRequest struct {
+	ArriveAt 	time.Time 				`json:"arrive_at"`
+	Money 		int64 					`json:"money"`
+	Products 	[]ProductArriveJson 	`json:"products"`
+}
+
+type ProductArriveJson struct {
+	Id 			int64 	`json:"id"`
+	Quantity	int64	`json:"quantity"`
+}

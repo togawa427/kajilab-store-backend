@@ -191,3 +191,37 @@ func (ProductService) CreatePaymentProduct(payment *model.PaymentProduct) (error
 	}
 	return nil
 }
+
+// 入荷情報を登録
+func (ProductService) CreateArrival(arrival *model.Arrival) (int64, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+
+	// 入荷情報をDBへ保存
+	result := db.Create(arrival)
+	if result.Error != nil {
+		fmt.Printf("入荷情報登録失敗 %v", result.Error)
+		return 0,result.Error
+	}
+	return int64(arrival.ID), nil
+}
+
+// 入荷した商品情報を登録
+func (ProductService) CreateArriveProduct(arriveProduct *model.ArrivalProduct) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 入荷商品をDBへ登録
+	result := db.Create(arriveProduct)
+	if result.Error != nil {
+		fmt.Printf("入荷商品情報登録失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
