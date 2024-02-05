@@ -63,6 +63,7 @@ func SetUpServer() *gin.Engine {
 		versionEngine.POST("/products/buy", controller.BuyProducts)
 		versionEngine.POST("/products/arrive", controller.ArriveProducts)
 		versionEngine.PUT("/products", controller.UpdateProduct)
+		versionEngine.DELETE("/products/buy/:paymentId", controller.DeletePayment)
 		//versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
 
 	}

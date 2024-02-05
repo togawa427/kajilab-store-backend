@@ -4,7 +4,7 @@
 Get {{baseURL}}/api/v1/products?limit=10&&offset=0
 
 ###
-Get {{baseURL}}/api/v1/products/buy/logs?limit=10
+Get {{baseURL}}/api/v1/products/buy/logs?limit=15
 
 ###
 Get {{baseURL}}/api/v1/products/arrive/logs?limit=10
@@ -73,5 +73,8 @@ Content-Type: application/json
     "stock":11,
     "tag_id":2
 }
+
+###
+DELETE {{baseURL}}/api/v1/products/buy/11
 
 # カンマの有無でエラー:invalid character '}' looking for beginning of object key stringがでるため注意

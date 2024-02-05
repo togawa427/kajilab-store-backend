@@ -354,3 +354,24 @@ func UpdateProduct(c *gin.Context) {
 
 	c.JSON(http.StatusOK, "success")
 }
+
+// 購入情報削除API
+func DeletePayment(c *gin.Context) {
+	ProductService := service.ProductService{}
+	paymentId, err := strconv.ParseInt(c.Param("paymentId"), 10, 64)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// 購入情報削除
+	// DBへ保存
+	err = ProductService.DeletePayment(paymentId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal delete payment")
+		return
+	}
+
+	c.JSON(http.StatusOK, "success")
+}

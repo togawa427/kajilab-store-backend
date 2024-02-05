@@ -242,3 +242,27 @@ func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
 	}
 	return nil
 }
+
+// 購入情報の削除
+func (ProductService) DeletePayment(id int64) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 購入情報をDBから削除
+	result := db.Delete(&model.Payment{}, id)
+	if result.Error != nil {
+		fmt.Printf("購入情報削除失敗 %v", result.Error)
+		return result.Error
+	}
+
+	// 購入商品情報をDBから削除
+	result = db.Where("payment_id LIKE ?", id).Delete(&model.PaymentProduct{})
+	if result.Error != nil {
+		fmt.Printf("購入商品情報削除失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
