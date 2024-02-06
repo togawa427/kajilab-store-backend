@@ -54,6 +54,34 @@ func GetAllProducts(c *gin.Context) {
 	c.JSON(http.StatusOK, resProducts)
 }
 
+// バーコードから商品取得API
+func GetProductByBarcode(c *gin.Context) {
+	ProductService := service.ProductService{}
+	barcode, err := strconv.ParseInt(c.Param("barcode"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "barcode is not number")
+		return
+	}
+	// 商品情報を取得
+	product, err := ProductService.GetProductByBarcode(barcode)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get product by barcode")
+		return
+	}
+	// レスポンスの型に変換
+	productJson := model.ProductGetResponse{
+		Id: int64(product.ID),
+		Name: product.Name,
+		Barcode: product.Barcode,
+		Price: product.Price,
+		Stock: product.Stock,
+		TagId: product.TagId,
+		ImagePath: product.ImagePath,
+	}
+
+	c.JSON(http.StatusOK, productJson)
+}
+
 // 購入ログの取得
 func GetBuyLogs(c *gin.Context) {
 	ProductService := service.ProductService{}

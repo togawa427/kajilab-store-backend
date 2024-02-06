@@ -4,6 +4,9 @@
 Get {{baseURL}}/api/v1/products?limit=10&&offset=0
 
 ###
+GET {{baseURL}}/api/v1/products/1234567891021
+
+###
 Get {{baseURL}}/api/v1/products/buy/logs?limit=15
 
 ###

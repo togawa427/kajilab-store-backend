@@ -58,6 +58,7 @@ func SetUpServer() *gin.Engine {
 	{
 		// products
 		versionEngine.GET("/products", controller.GetAllProducts)
+		versionEngine.GET("/products/:barcode", controller.GetProductByBarcode)
 		versionEngine.GET("/products/buy/logs", controller.GetBuyLogs)
 		versionEngine.GET("/products/arrive/logs", controller.GetArriveLogs)
 		versionEngine.POST("/products", controller.CreateProduct)

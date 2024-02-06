@@ -30,6 +30,23 @@ func (ProductService) GetAllProducts(limit int64, offset int64) ([]model.Product
 	return products, nil
 }
 
+// バーコードから商品情報取得
+func (ProductService) GetProductByBarcode (barcode int64) (model.Product, error) {
+	product := model.Product{}
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return product, err
+	}
+	// 取得
+	result := db.Where(&model.Product{Barcode: barcode}).First(&product)
+	if result.Error != nil {
+		fmt.Printf("購入商品取得失敗 %v", result.Error)
+		return product, result.Error
+	}
+	return product, nil
+}
+
 // 購入ログを取得
 func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
