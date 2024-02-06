@@ -304,7 +304,7 @@ func ArriveProducts(c *gin.Context) {
 		return
 	}
 
-	// 入荷商品情報を登録
+	// 入荷商品情報を登録, 在庫情報を更新
 	productsJson := ProductsArriveRequest.Products
 	for _, productJson := range productsJson {
 		// リクエストの商品情報をデータベースの型へ変換
@@ -313,12 +313,19 @@ func ArriveProducts(c *gin.Context) {
 			ProductId: productJson.Id,
 			Quantity: productJson.Quantity,
 		}
-		// DBへ保存
+		// 入荷商品情報をDBへ保存DBへ保存
 		err = ProductService.CreateArriveProduct(&product)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create arrival_product")
 			return
-		}	
+		}
+		// 在庫情報をDBへ保存
+		err = ProductService.IncreaseStock(product.ProductId, product.Quantity)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase stock")
+			return
+		}
+
 	}
 
 	// お金を減らす
@@ -378,6 +385,12 @@ func DeletePayment(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get payment")
 		return
 	}
+	// 購入商品情報取得
+	paymentProducts, err := ProductService.GetPaymentProductsByPaymentId(paymentId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get payment_products")
+		return
+	}
 
 	// 購入情報削除
 	// DBへ保存
@@ -386,12 +399,19 @@ func DeletePayment(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal delete payment")
 		return
 	}
-
 	// お金を減らす
 	err = AssetService.IncreaseMoney(0-payment.Price)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
 		return
+	}
+	// 在庫を増やす
+	for _, paymentProduct := range paymentProducts {
+		err = ProductService.IncreaseStock(paymentProduct.ProductId, paymentProduct.Quantity)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase stock")
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, "success")
@@ -414,6 +434,11 @@ func DeleteArrival(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get arrival")
 		return
 	}
+	arrivalProducts, err := ProductService.GetArrivalProductsByArrivalId(arrivalId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get arrival_product")
+		return
+	}
 
 	// 入荷情報削除
 	// DBへ保存
@@ -422,12 +447,19 @@ func DeleteArrival(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal delete arrival")
 		return
 	}
-
 	// お金を増やす
 	err = AssetService.IncreaseMoney(arrival.Money)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase money")
 		return
+	}
+	// 在庫を減らす
+	for _, arrivalProduct := range arrivalProducts {
+		err = ProductService.IncreaseStock(arrivalProduct.ProductId, 0-arrivalProduct.Quantity)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease stock")
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, "success")

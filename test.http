@@ -75,10 +75,10 @@ Content-Type: application/json
 }
 
 ###
-DELETE {{baseURL}}/api/v1/products/buy/16
+DELETE {{baseURL}}/api/v1/products/buy/21
 
 ###
-DELETE {{baseURL}}/api/v1/products/arrival/10
+DELETE {{baseURL}}/api/v1/products/arrival/12
 
 ###
 GET {{baseURL}}/api/v1/assets
