@@ -325,3 +325,26 @@ func (ProductService) DeleteArrival(id int64) (error) {
 	}
 	return nil
 }
+
+// 在庫を増やす
+func (ProductService) IncreaseStock(productId int64, quantity int64)(error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// 商品情報を取得
+	product := model.Product{}
+	result := db.First(&product, productId)
+	if result.Error != nil {
+		fmt.Printf("商品情報取得失敗 %v", result.Error)
+		return result.Error
+	}
+	// 在庫情報を更新
+	result = db.Model(&model.Product{}).Where("id = ?", productId).Update("stock", product.Stock + quantity)
+	if result.Error != nil {
+		fmt.Printf("在庫更新失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
