@@ -57,7 +57,7 @@ func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
 
 	logs := make([]model.Payment, 0)
 	//result := db.Order("name").Find(&products)
-	result := db.Limit(int(limit)).Find(&logs)
+	result := db.Order("ID desc").Limit(int(limit)).Find(&logs)
 	if result.Error != nil {
 		fmt.Printf("購入履歴取得失敗 %v", result.Error)
 		return nil, result.Error
@@ -124,7 +124,7 @@ func (ProductService) GetArriveLogs(limit int64) ([]model.Arrival, error){
 	}
 
 	logs := make([]model.Arrival, 0)
-	result := db.Limit(int(limit)).Find(&logs)
+	result := db.Order("ID desc").Limit(int(limit)).Find(&logs)
 	if result.Error != nil {
 		fmt.Printf("入荷履歴取得失敗 %v", result.Error)
 		return nil, result.Error

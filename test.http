@@ -7,7 +7,7 @@ Get {{baseURL}}/api/v1/products?limit=10&&offset=0
 GET {{baseURL}}/api/v1/products/1234567891021
 
 ###
-Get {{baseURL}}/api/v1/products/buy/logs?limit=15
+Get {{baseURL}}/api/v1/products/buy/logs?limit=5
 
 ###
 Get {{baseURL}}/api/v1/products/arrive/logs?limit=10
@@ -28,7 +28,7 @@ POST {{baseURL}}/api/v1/products/buy
 Content-Type: application/json
 
 {
-    "pay_at": "2024-02-05T23:32:37.115934+09:00",
+    "pay_at": "2024-02-06T23:32:37.115934+09:00",
     "method": "cash",
     "user_number": "K20079",
     "products": [
@@ -78,7 +78,7 @@ Content-Type: application/json
 }
 
 ###
-DELETE {{baseURL}}/api/v1/products/buy/21
+DELETE {{baseURL}}/api/v1/products/buy/6
 
 ###
 DELETE {{baseURL}}/api/v1/products/arrival/12
