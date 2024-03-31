@@ -294,6 +294,23 @@ func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
 	return nil
 }
 
+// 商品画像パスの更新
+func (ProductService) UpdateProductImagePath(id int64, imagePath string) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 商品情報をDBへ登録
+	result := db.Model(&model.Product{}).Where("id = ?", id).Update("image_path", imagePath)
+	if result.Error != nil {
+		fmt.Printf("商品画像パス更新失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
+
 // 購入情報の削除
 func (ProductService) DeletePayment(id int64) (error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})

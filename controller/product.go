@@ -396,6 +396,28 @@ func UpdateProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, "success")
 }
 
+// 商品画像パス更新API
+func UpdateProductImagePath(c *gin.Context) {
+	ProductService := service.ProductService{}
+	ProductUpdateRequest := model.ProductImageUpdateRequest{}
+	err := c.Bind(&ProductUpdateRequest)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	// 商品情報更新
+	// DBへ保存
+	err = ProductService.UpdateProductImagePath(ProductUpdateRequest.Id, ProductUpdateRequest.ImagePath)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update product image")
+		return
+	}
+
+	c.JSON(http.StatusOK, "success")
+}
+
 // 購入情報削除API
 func DeletePayment(c *gin.Context) {
 	ProductService := service.ProductService{}
