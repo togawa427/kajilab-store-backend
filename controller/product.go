@@ -33,6 +33,7 @@ func GetAllProducts(c *gin.Context) {
 	// DBから商品情報取得
 	products, err := ProductService.GetAllProducts(limit, offset)
 	if err != nil {
+		fmt.Println(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get products from DB")
 		return
 	}
