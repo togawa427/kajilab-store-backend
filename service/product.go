@@ -19,6 +19,11 @@ func (ProductService) GetAllProducts(limit int64, offset int64) ([]model.Product
 		fmt.Println(err)
 		return nil, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	products := make([]model.Product, 0)
 	//result := db.Order("name").Find(&products)
@@ -38,6 +43,12 @@ func (ProductService) GetProductByBarcode (barcode int64) (model.Product, error)
 		fmt.Println(err)
 		return product, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
 	// 取得
 	result := db.Where(&model.Product{Barcode: barcode}).First(&product)
 	if result.Error != nil {
@@ -54,6 +65,11 @@ func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
 		fmt.Println(err)
 		return nil, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	logs := make([]model.Payment, 0)
 	//result := db.Order("name").Find(&products)
@@ -71,6 +87,11 @@ func (ProductService) GetBuyProductsByPaymentId(paymentId int64) ([]model.Paymen
 		fmt.Println(err)
 		return nil, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	products := make([]model.PaymentProduct, 0)
 	result := db.Where("payment_id = ?", paymentId).Find(&products)
@@ -88,6 +109,11 @@ func (ProductService) GetBuyProducts() ([]model.PaymentProduct, error){
 		fmt.Println(err)
 		return nil, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	products := make([]model.PaymentProduct, 0)
 	result := db.Find(&products)
@@ -105,6 +131,11 @@ func (ProductService) GetProductById(id int64) (model.Product, error) {
 		fmt.Println(err)
 		return model.Product{}, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	var product model.Product
 	result := db.First(&product, id)
@@ -122,6 +153,11 @@ func (ProductService) GetArriveLogs(limit int64) ([]model.Arrival, error){
 		fmt.Println(err)
 		return nil, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	logs := make([]model.Arrival, 0)
 	result := db.Order("ID desc").Limit(int(limit)).Find(&logs)
@@ -139,6 +175,11 @@ func (ProductService) GetArriveProductsByArriveId(arriveId int64) ([]model.Arriv
 		fmt.Println(err)
 		return nil, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	products := make([]model.ArrivalProduct, 0)
 	result := db.Where("arrival_id = ?", arriveId).Find(&products)
@@ -156,6 +197,11 @@ func (ProductService) GetPaymentById(id int64) (model.Payment, error) {
 		fmt.Println(err)
 		return model.Payment{}, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	payment := model.Payment{}
 	result := db.First(&payment, id)
@@ -173,6 +219,11 @@ func (ProductService) GetArrivalById(id int64) (model.Arrival, error) {
 		fmt.Println(err)
 		return model.Arrival{}, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	arrival := model.Arrival{}
 	result := db.First(&arrival, id)
@@ -190,6 +241,11 @@ func (ProductService) CreateProduct(product *model.Product) error {
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// バーコードのかぶりチェック
 	existProduct := model.Product{}
@@ -216,6 +272,11 @@ func (ProductService) CreatePayment(payment *model.Payment) (int64, error) {
 		fmt.Println(err)
 		return 0,err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 購入情報をDBへ登録
 	result := db.Create(payment)
@@ -233,6 +294,11 @@ func (ProductService) CreatePaymentProduct(payment *model.PaymentProduct) (error
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 購入商品をDBへ保存
 	result := db.Create(payment)
@@ -250,6 +316,11 @@ func (ProductService) CreateArrival(arrival *model.Arrival) (int64, error) {
 		fmt.Println(err)
 		return 0, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 入荷情報をDBへ保存
 	result := db.Create(arrival)
@@ -267,6 +338,11 @@ func (ProductService) CreateArriveProduct(arriveProduct *model.ArrivalProduct) (
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 入荷商品をDBへ登録
 	result := db.Create(arriveProduct)
@@ -284,6 +360,11 @@ func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 商品情報をDBへ登録
 	result := db.Model(&model.Product{}).Where("id = ?", id).Updates(&product)
@@ -301,6 +382,11 @@ func (ProductService) UpdateProductImagePath(id int64, imagePath string) (error)
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 商品情報をDBへ登録
 	result := db.Model(&model.Product{}).Where("id = ?", id).Update("image_path", imagePath)
@@ -318,6 +404,11 @@ func (ProductService) DeletePayment(id int64) (error) {
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 購入情報をDBから削除
 	result := db.Delete(&model.Payment{}, id)
@@ -343,6 +434,11 @@ func (ProductService) DeleteArrival(id int64) (error) {
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 入荷情報をDBから削除
 	result := db.Delete(&model.Arrival{}, id)
@@ -367,6 +463,12 @@ func (ProductService) IncreaseStock(productId int64, quantity int64)(error) {
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
 	// 商品情報を取得
 	product := model.Product{}
 	result := db.First(&product, productId)
@@ -391,6 +493,12 @@ func (ProductService) GetPaymentProductsByPaymentId(paymentId int64)([]model.Pay
 		fmt.Println(err)
 		return paymentProducts, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
 	// 取得
 	result := db.Where(&model.PaymentProduct{PaymentId: paymentId}).Find(&paymentProducts)
 	if result.Error != nil {
@@ -408,6 +516,12 @@ func (ProductService) GetArrivalProductsByArrivalId(arrivalId int64) ([]model.Ar
 		fmt.Println(err)
 		return arrivalProducts, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+	
 	// 取得
 	result := db.Where(&model.ArrivalProduct{ArrivalId: arrivalId}).Find(&arrivalProducts)
 	if result.Error != nil {

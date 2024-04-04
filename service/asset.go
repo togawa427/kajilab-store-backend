@@ -19,6 +19,12 @@ func (AssetService) IncreaseMoney(money int64) (error) {
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+	
 
 	// 現在のお金を取得
 	asset := model.Asset{}
@@ -44,6 +50,11 @@ func (AssetService) GetAsset() (model.Asset, error) {
 		fmt.Println(err)
 		return model.Asset{}, err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 現在の予算をDBから取得
 	asset := model.Asset{}
@@ -63,6 +74,11 @@ func (AssetService) UpdateAsset(asset *model.Asset) (error) {
 		fmt.Println(err)
 		return err
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
 
 	// 財産情報をDBへ登録
 	result := db.Model(&model.Asset{}).Where("id = ?", 1).Updates(&asset)
