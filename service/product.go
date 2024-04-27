@@ -506,6 +506,29 @@ func (ProductService) IncreaseStock(productId int64, quantity int64)(error) {
 	return nil
 }
 
+// 商品ログを取得
+func (ProductService) GetProductLogsBySourceId(sourceId int64)([]model.ProductLog, error) {
+	productLogs := []model.ProductLog{}
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return productLogs, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	// 取得
+	result := db.Where(&model.ProductLog{SourceId: sourceId}).Find(&productLogs)
+	if result.Error != nil {
+		fmt.Printf("購入商品取得失敗 %v", result.Error)
+		return productLogs, result.Error
+	}
+	return productLogs, nil
+}
+
 // 購入商品情報を取得
 func (ProductService) GetPaymentProductsByPaymentId(paymentId int64)([]model.PaymentProduct, error) {
 	paymentProducts := []model.PaymentProduct{}

@@ -82,7 +82,7 @@ func (AssetService) UpdateAsset(asset *model.Asset) (error) {
 	defer sqlDB.Close()
 
 	// 財産情報をDBへ登録
-	result := db.Model(&model.Asset{}).Where("id = ?", 1).Updates(&asset)
+	result := db.Create(asset) 
 	if result.Error != nil {
 		fmt.Printf("商品情報更新失敗 %v", result.Error)
 		return result.Error

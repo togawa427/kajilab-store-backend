@@ -446,11 +446,12 @@ func DeletePayment(c *gin.Context) {
 		return
 	}
 	// 購入商品情報取得
-	paymentProducts, err := ProductService.GetPaymentProductsByPaymentId(paymentId)
+	productLogs, err := ProductService.GetProductLogsBySourceId(paymentId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get payment_products")
 		return
 	}
+
 
 	// 購入情報削除
 	// DBへ保存
@@ -466,8 +467,8 @@ func DeletePayment(c *gin.Context) {
 		return
 	}
 	// 在庫を増やす
-	for _, paymentProduct := range paymentProducts {
-		err = ProductService.IncreaseStock(paymentProduct.ProductId, paymentProduct.Quantity)
+	for _, productLog := range productLogs {
+		err = ProductService.IncreaseStock(productLog.ProductId, productLog.Quantity)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase stock")
 			return
