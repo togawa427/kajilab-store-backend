@@ -35,7 +35,8 @@ func (AssetService) IncreaseMoney(money int64) (error) {
 	}
 
 	// DBへ更新
-	result = db.Model(&model.Asset{}).Where("id = 1").Update("money", asset.Money + money)
+	//result = db.Model(&model.Asset{}).Where("id = 1").Update("money", asset.Money + money)
+	result = db.Create(&model.Asset{Money: asset.Money+money, Debt: asset.Debt})
 	if result.Error != nil {
 		fmt.Printf("財産更新失敗 %v", result.Error)
 		return result.Error
