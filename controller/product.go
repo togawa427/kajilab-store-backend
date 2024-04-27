@@ -411,6 +411,20 @@ func UpdateProduct(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update product")
 		return
 	}
+	
+	productLog := model.ProductLog{
+		SourceId: -1,
+		ProductId: int64(product.ID),
+		Quantity: -1,
+		UnitPrice: product.Price,
+		Stock: product.Stock,
+	}
+	// 入荷商品情報をDBへ保存DBへ保存
+	err = ProductService.CreateProductLog(&productLog)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create arrival_product")
+		return
+	}
 
 	c.JSON(http.StatusOK, "success")
 }
