@@ -59,7 +59,7 @@ func (AssetService) GetAsset() (model.Asset, error) {
 
 	// 現在の予算をDBから取得
 	asset := model.Asset{}
-	result := db.First(&asset)
+	result := db.Last(&asset)
 	if result.Error != nil {
 		fmt.Printf("財産取得失敗 %v", result.Error)
 		return model.Asset{}, result.Error
