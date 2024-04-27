@@ -105,7 +105,7 @@ func GetBuyLogs(c *gin.Context) {
 	for _, log := range logs {
 
 		// 購入物の商品情報を取得
-		buyProducts, err := ProductService.GetBuyProductsByPaymentId(int64(log.ID))
+		buyProducts, err := ProductService.GetProductLogsBySourceId(int64(log.ID))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproducts from DB")
 			return

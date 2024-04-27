@@ -81,49 +81,6 @@ func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
 	return logs, nil
 }
 
-func (ProductService) GetBuyProductsByPaymentId(paymentId int64) ([]model.PaymentProduct, error){
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer sqlDB.Close()
-
-	products := make([]model.PaymentProduct, 0)
-	result := db.Where("payment_id = ?", paymentId).Find(&products)
-	if result.Error != nil {
-		fmt.Printf("購入物取得失敗 %v", result.Error)
-		return nil, result.Error
-	}
-	return products, nil
-}
-
-// 購入物を取得
-func (ProductService) GetBuyProducts() ([]model.PaymentProduct, error){
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer sqlDB.Close()
-
-	products := make([]model.PaymentProduct, 0)
-	result := db.Find(&products)
-	if result.Error != nil {
-		fmt.Printf("購入物取得失敗 %v", result.Error)
-		return nil, result.Error
-	}
-	return products, nil
-}
-
 // IDから商品情報を取得
 func (ProductService) GetProductById(id int64) (model.Product, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
@@ -287,27 +244,6 @@ func (ProductService) CreatePayment(payment *model.Payment) (int64, error) {
 	return int64(payment.ID),nil
 }
 
-// 購入した商品の情報を登録
-func (ProductService) CreatePaymentProduct(payment *model.PaymentProduct) (error) {
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer sqlDB.Close()
-
-	// 購入商品をDBへ保存
-	result := db.Create(payment)
-	if result.Error != nil {
-		fmt.Printf("購入商品登録失敗 %v", result.Error)
-		return result.Error
-	}
-	return nil
-}
 
 func (ProductService) CreateProductLog(productLog *model.ProductLog) (error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
@@ -438,8 +374,8 @@ func (ProductService) DeletePayment(id int64) (error) {
 		return result.Error
 	}
 
-	// 購入商品情報をDBから削除
-	result = db.Where("payment_id LIKE ?", id).Delete(&model.PaymentProduct{})
+	// 購入商品情報ログをDBから削除
+	result = db.Where("source_id LIKE ?", id).Delete(&model.ProductLog{})
 	if result.Error != nil {
 		fmt.Printf("購入商品情報削除失敗 %v", result.Error)
 		return result.Error
@@ -527,29 +463,6 @@ func (ProductService) GetProductLogsBySourceId(sourceId int64)([]model.ProductLo
 		return productLogs, result.Error
 	}
 	return productLogs, nil
-}
-
-// 購入商品情報を取得
-func (ProductService) GetPaymentProductsByPaymentId(paymentId int64)([]model.PaymentProduct, error) {
-	paymentProducts := []model.PaymentProduct{}
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return paymentProducts, err
-	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer sqlDB.Close()
-
-	// 取得
-	result := db.Where(&model.PaymentProduct{PaymentId: paymentId}).Find(&paymentProducts)
-	if result.Error != nil {
-		fmt.Printf("購入商品取得失敗 %v", result.Error)
-		return paymentProducts, result.Error
-	}
-	return paymentProducts, nil
 }
 
 // 入荷商品情報を取得
