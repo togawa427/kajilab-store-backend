@@ -125,28 +125,6 @@ func (ProductService) GetArriveLogs(limit int64) ([]model.Arrival, error){
 	return logs, nil
 }
 
-// 入荷IDから入荷商品の取得
-func (ProductService) GetArriveProductsByArriveId(arriveId int64) ([]model.ArrivalProduct, error){
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer sqlDB.Close()
-
-	products := make([]model.ArrivalProduct, 0)
-	result := db.Where("arrival_id = ?", arriveId).Find(&products)
-	if result.Error != nil {
-		fmt.Printf("入荷商品取得失敗 %v", result.Error)
-		return nil, result.Error
-	}
-	return products, nil
-}
-
 // 購入情報を取得
 func (ProductService) GetPaymentById(id int64) (model.Payment, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
@@ -257,7 +235,7 @@ func (ProductService) CreateProductLog(productLog *model.ProductLog) (error) {
 	}
 	defer sqlDB.Close()
 
-	// 購入商品をDBへ保存
+	// 購入入荷商品をDBへ保存
 	result := db.Create(productLog)
 	if result.Error != nil {
 		fmt.Printf("購入ログ登録失敗 %v", result.Error)
@@ -286,28 +264,6 @@ func (ProductService) CreateArrival(arrival *model.Arrival) (int64, error) {
 		return 0,result.Error
 	}
 	return int64(arrival.ID), nil
-}
-
-// 入荷した商品情報を登録
-func (ProductService) CreateArriveProduct(arriveProduct *model.ArrivalProduct) (error) {
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer sqlDB.Close()
-
-	// 入荷商品をDBへ登録
-	result := db.Create(arriveProduct)
-	if result.Error != nil {
-		fmt.Printf("入荷商品情報登録失敗 %v", result.Error)
-		return result.Error
-	}
-	return nil
 }
 
 // 商品情報の更新
@@ -405,7 +361,7 @@ func (ProductService) DeleteArrival(id int64) (error) {
 	}
 
 	// 入荷商品情報をDBから削除
-	result = db.Where("arrival_id LIKE ?", id).Delete(&model.ArrivalProduct{})
+	result = db.Where("source_id LIKE ?", id).Delete(&model.ProductLog{})
 	if result.Error != nil {
 		fmt.Printf("入荷商品情報削除失敗 %v", result.Error)
 		return result.Error
@@ -463,27 +419,4 @@ func (ProductService) GetProductLogsBySourceId(sourceId int64)([]model.ProductLo
 		return productLogs, result.Error
 	}
 	return productLogs, nil
-}
-
-// 入荷商品情報を取得
-func (ProductService) GetArrivalProductsByArrivalId(arrivalId int64) ([]model.ArrivalProduct, error) {
-	arrivalProducts := []model.ArrivalProduct{}
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return arrivalProducts, err
-	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer sqlDB.Close()
-	
-	// 取得
-	result := db.Where(&model.ArrivalProduct{ArrivalId: arrivalId}).Find(&arrivalProducts)
-	if result.Error != nil {
-		fmt.Printf("入荷商品取得失敗 %v", result.Error)
-		return arrivalProducts, result.Error
-	}
-	return arrivalProducts, nil
 }

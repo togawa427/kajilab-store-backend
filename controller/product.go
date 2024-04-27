@@ -166,7 +166,7 @@ func GetArriveLogs(c *gin.Context){
 		totalValue := int64(0)
 
 		// 入荷物の商品情報を取得
-		arriveProducts, err := ProductService.GetArriveProductsByArriveId(int64(log.ID))
+		arriveProducts, err := ProductService.GetProductLogsBySourceId(int64(log.ID))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get arrivalproducts from DB")
 			return
@@ -289,7 +289,7 @@ func BuyProducts(c *gin.Context) {
 			ProductId: productJson.Id,
 			Quantity: productJson.Quantity,
 			UnitPrice: productJson.UnitPrice,
-			Stock: productInfo.Stock,
+			Stock: productInfo.Stock - productJson.Quantity,
 		}
 
 		// 購入商品情報をDBへ保存
@@ -345,14 +345,23 @@ func ArriveProducts(c *gin.Context) {
 	// 入荷商品情報を登録, 在庫情報を更新
 	productsJson := ProductsArriveRequest.Products
 	for _, productJson := range productsJson {
+
+		// 現在の商品情報（在庫数取得のため）を取得
+		productInfo, err := ProductService.GetProductById(productJson.Id)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get product_stock")
+			return
+		}
 		// リクエストの商品情報をデータベースの型へ変換
-		product := model.ArrivalProduct{
-			ArrivalId: arrivalId,
+		product := model.ProductLog{
+			SourceId: arrivalId,
 			ProductId: productJson.Id,
 			Quantity: productJson.Quantity,
+			UnitPrice: productInfo.Price,
+			Stock: productInfo.Stock + productJson.Quantity,
 		}
 		// 入荷商品情報をDBへ保存DBへ保存
-		err = ProductService.CreateArriveProduct(&product)
+		err = ProductService.CreateProductLog(&product)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create arrival_product")
 			return
@@ -495,7 +504,7 @@ func DeleteArrival(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get arrival")
 		return
 	}
-	arrivalProducts, err := ProductService.GetArrivalProductsByArrivalId(arrivalId)
+	arrivalProducts, err := ProductService.GetProductLogsBySourceId(arrivalId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get arrival_product")
 		return
