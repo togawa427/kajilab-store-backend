@@ -285,6 +285,13 @@ func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
 		fmt.Printf("商品情報更新失敗 %v", result.Error)
 		return result.Error
 	}
+	// 0の場合更新対象から外れるためポインタを使用
+	stock := product.Stock
+	result = db.Model(&model.Product{}).Where("id = ?", id).Update("stock", &stock)
+	if result.Error != nil {
+		fmt.Printf("商品個数更新失敗 %v", result.Error)
+		return result.Error
+	}
 	return nil
 }
 
