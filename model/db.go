@@ -50,3 +50,19 @@ type ArrivalProduct struct {
 	ProductId 	int64
 	Quantity 	int64
 }
+
+type ProductLog struct {
+	gorm.Model
+	SourceId 	int64
+	ProductId int64
+	Quantity 	int64
+	UnitPrice int64
+	Stock 		int64
+}
+
+type User struct {
+	gorm.Model
+	Name 		string
+	Debt 		int64
+	Barcode string
+}

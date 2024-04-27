@@ -94,6 +94,8 @@ func SetUpDatabase() {
 	db.AutoMigrate(&model.PaymentProduct{})
 	db.AutoMigrate(&model.Arrival{})
 	db.AutoMigrate(&model.ArrivalProduct{})
+	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.ProductLog{})
 
 	// サンプルデータの挿入
 	db.Create(&model.Product{Name: "じゃがりこサラダ味", Barcode: 134912341234, Price: 120, Stock: 9, TagId: 1, ImagePath: "public/images/jagariko.jpg"})
