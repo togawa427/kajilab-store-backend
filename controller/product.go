@@ -276,21 +276,30 @@ func BuyProducts(c *gin.Context) {
 	// 購入商品情報を登録，在庫を更新
 	for _, productJson := range productsJson {
 		fmt.Println("start")
-		// リクエストの商品情報をデータベースの型へ変換
-		product := model.PaymentProduct{
-			PaymentId: paymentId,
+
+		// 現在の商品情報（在庫数取得のため）を取得
+		productInfo, err := ProductService.GetProductById(productJson.Id)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get product_stock")
+			return
+		}
+
+		productLog := model.ProductLog{
+			SourceId: paymentId,
 			ProductId: productJson.Id,
 			Quantity: productJson.Quantity,
 			UnitPrice: productJson.UnitPrice,
+			Stock: productInfo.Stock,
 		}
+
 		// 購入商品情報をDBへ保存
-		err = ProductService.CreatePaymentProduct(&product)
+		err = ProductService.CreateProductLog(&productLog)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create payment_product")
 			return
 		}
 		// 在庫情報をDBへ保存
-		err = ProductService.IncreaseStock(product.ProductId, 0-product.Quantity)
+		err = ProductService.IncreaseStock(productLog.ProductId, 0-productLog.Quantity)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease stock")
 			return

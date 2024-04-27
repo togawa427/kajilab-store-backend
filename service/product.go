@@ -309,6 +309,27 @@ func (ProductService) CreatePaymentProduct(payment *model.PaymentProduct) (error
 	return nil
 }
 
+func (ProductService) CreateProductLog(productLog *model.ProductLog) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	// 購入商品をDBへ保存
+	result := db.Create(productLog)
+	if result.Error != nil {
+		fmt.Printf("購入ログ登録失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
+
 // 入荷情報を登録
 func (ProductService) CreateArrival(arrival *model.Arrival) (int64, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
