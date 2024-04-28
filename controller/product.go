@@ -9,6 +9,7 @@ import (
 	"kajilab-store-backend/service"
 	"net/http"
 	"strconv"
+	"time"
 
 	// // "strconv"
 
@@ -82,6 +83,40 @@ func GetProductByBarcode(c *gin.Context) {
 
 	c.JSON(http.StatusOK, productJson)
 }
+
+// 現在からxx日分の在庫
+func GetProductStockLogsById(c *gin.Context) {
+	ProductService := service.ProductService{}
+	// 商品ID取得
+	productId, err := strconv.ParseInt(c.Param("productId"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "productId is not number")
+		return
+	}
+
+	// 何日分なのかを取得
+	day, err := strconv.ParseInt(c.Query("day"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "day is not number")
+		return
+	}
+
+	// day日分の商品ログを取得
+	productLogs, err := ProductService.GetProductLogsByDay(day, productId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal to is get product logs by days")
+		return
+	}
+	fmt.Println("GetProductStockLogsByIdの結果")
+	fmt.Println(productLogs)
+	var resLogs [20]model.ProductStockLogJson
+	for i := range resLogs {
+		resLogs[i].Date = time.Now()
+		resLogs[i].Stock = 3
+	}
+	fmt.Println(resLogs)
+}
+
 
 // 購入ログの取得
 func GetBuyLogs(c *gin.Context) {

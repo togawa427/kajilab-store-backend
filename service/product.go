@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kajilab-store-backend/model"
 	"os"
+	"time"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -101,6 +102,28 @@ func (ProductService) GetProductById(id int64) (model.Product, error) {
 		return product, result.Error
 	}
 	return product, nil
+}
+
+func (ProductService) GetProductLogsByDay(day int64, productId int64) ([]model.ProductLog, error){
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	dayAgo := time.Now().Add((0-time.Duration(day)) * 24 * time.Hour)
+	logs := make([]model.ProductLog, 0)
+	result := db.Where("created_at >= ?", dayAgo).Find(&logs)
+	if result.Error != nil {
+		fmt.Printf("商品ログ取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	return logs, nil
 }
 
 // 入荷ログを取得
