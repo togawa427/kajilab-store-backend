@@ -34,3 +34,28 @@ func CreateUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, "success")
 }
+
+func UpdateUserDebt(c *gin.Context) {
+	UserService := service.UserService{}
+	UserUpdateDebtRequest := model.UserUpdateDebtRequest{}
+	err := c.Bind(&UserUpdateDebtRequest)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
+		return
+	}
+
+	user := model.User{
+		Name: "",	// 変更しない
+		Debt: UserUpdateDebtRequest.Debt,
+		Barcode: "",	// 変更しない
+	}
+
+	err = UserService.UpdateUser(UserUpdateDebtRequest.Id, &user)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update user")
+		return
+	}
+
+	c.JSON(http.StatusOK, "success")
+}
