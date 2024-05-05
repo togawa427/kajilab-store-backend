@@ -118,3 +118,8 @@ type UserUpdateDebtRequest struct {
 	Id		int64 	`json:"id"`
 	Debt 	int64 	`json:"debt"`
 }
+
+type UserUpdateBarcodeRequest struct {
+	Id 			int64 	`json:"id"`
+	Barcode string	`json:"barcode"`
+}
