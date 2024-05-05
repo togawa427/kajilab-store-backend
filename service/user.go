@@ -13,7 +13,7 @@ import (
 type UserService struct{}
 
 // バーコードからユーザ情報取得
-func (UserService) GetUserByBarcode(barcode string) (model.User, error) {
+func (UserService) GetUserByBarcode (barcode string) (model.User, error) {
 	user := model.User{}
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
@@ -29,7 +29,7 @@ func (UserService) GetUserByBarcode(barcode string) (model.User, error) {
 	// 取得
 	result := db.Where(&model.User{Barcode: barcode}).First(&user)
 	if result.Error != nil {
-		fmt.Printf("購入商品取得失敗 %v", result.Error)
+		fmt.Printf("ユーザ取得失敗 %v", result.Error)
 		return user, result.Error
 	}
 	return user, nil

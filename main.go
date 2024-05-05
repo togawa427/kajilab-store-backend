@@ -75,6 +75,7 @@ func SetUpServer() *gin.Engine {
 		versionEngine.PUT("/assets", controller.UpdateAsset)
 
 		// users
+		versionEngine.GET("/users/:barcode", controller.GetUserByBarcode)
 		versionEngine.POST("/users", controller.CreateUser)
 		versionEngine.PUT("/users/debt", controller.UpdateUserDebt)
 		versionEngine.PUT("/users/barcode", controller.UpdateUserBarcode)

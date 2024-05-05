@@ -9,6 +9,27 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// バーコードからユーザ取得API
+func GetUserByBarcode(c *gin.Context) {
+	UserService := service.UserService{}
+	barcode := c.Param("barcode")
+	// ユーザ情報を取得
+	user, err := UserService.GetUserByBarcode(barcode)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get user by barcode")
+		return
+	}
+	// レスポンスの型に変換
+	userResponse := model.UserGetResponse{
+		Id: int64(user.ID),
+		Name: user.Name,
+		Debt: user.Debt,
+		Barcode: user.Barcode,
+	}
+
+	c.JSON(http.StatusOK, userResponse)
+}
+
 func CreateUser(c *gin.Context) {
 	UserService := service.UserService{}
 	UserCreateRequest := model.UserCreateRequest{}
