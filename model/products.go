@@ -108,3 +108,8 @@ type ProductImageUpdateRequest struct {
 	Id					int64		`json:"id"`
 	ImagePath 	string	`json:"image_path"`
 }
+
+type UserCreateRequest struct {
+	Name 		string	`json:"name"`
+	Barcode string	`json:"barcode"`
+}
