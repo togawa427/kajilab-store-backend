@@ -58,6 +58,7 @@ func CreateUser(c *gin.Context) {
 
 func UpdateUserDebt(c *gin.Context) {
 	UserService := service.UserService{}
+	AssetService := service.AssetService{}
 	UserUpdateDebtRequest := model.UserUpdateDebtRequest{}
 	err := c.Bind(&UserUpdateDebtRequest)
 	if err != nil {
@@ -66,12 +67,19 @@ func UpdateUserDebt(c *gin.Context) {
 		return
 	}
 
+	// 変更前のユーザ
+	beforeUser, err := UserService.GetUserById(UserUpdateDebtRequest.Id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get user")
+		return
+	}
+
+	// ユーザ情報の更新
 	user := model.User{
 		Name: "",	// 変更しない
 		Debt: UserUpdateDebtRequest.Debt,
 		Barcode: "",	// 変更しない
 	}
-
 	err = UserService.UpdateUser(UserUpdateDebtRequest.Id, &user)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update user")
@@ -79,6 +87,11 @@ func UpdateUserDebt(c *gin.Context) {
 	}
 
 	// 「変更後のユーザの残高　-　変更前のユーザの残高」を商店Debtに足す
+	err = AssetService.IncreaseDebt(UserUpdateDebtRequest.Debt - beforeUser.Debt)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update asset")
+		return
+	}
 
 	c.JSON(http.StatusOK, "success")
 }

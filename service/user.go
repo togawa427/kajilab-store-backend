@@ -12,6 +12,29 @@ import (
 
 type UserService struct{}
 
+// IDからユーザ情報取得
+func (UserService) GetUserById (id int64) (model.User, error) {
+	user := model.User{}
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return user, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	// 取得
+	result := db.First(&user, id)
+	if result.Error != nil {
+		fmt.Printf("ユーザ取得失敗 %v", result.Error)
+		return user, result.Error
+	}
+	return user, nil
+}
+
 // バーコードからユーザ情報取得
 func (UserService) GetUserByBarcode (barcode string) (model.User, error) {
 	user := model.User{}
