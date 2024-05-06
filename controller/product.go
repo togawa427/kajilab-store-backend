@@ -521,6 +521,7 @@ func UpdateProductImagePath(c *gin.Context) {
 func DeletePayment(c *gin.Context) {
 	ProductService := service.ProductService{}
 	AssetService := service.AssetService{}
+	UserService := service.UserService{}
 	paymentId, err := strconv.ParseInt(c.Param("paymentId"), 10, 64)
 	if err != nil {
 		fmt.Println(err)
@@ -549,12 +550,29 @@ func DeletePayment(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal delete payment")
 		return
 	}
-	// お金を減らす
-	err = AssetService.IncreaseMoney(0-payment.Price)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
-		return
+
+	if(payment.Method == "card"){
+		// ユーザ残高を増やす
+		err = UserService.IncreaseUserDebt(payment.UserId,payment.Price)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase user debt")
+			return
+		}
+		// 商店残高を増やす
+		err = AssetService.IncreaseDebt(payment.Price)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase debt")
+			return
+		}
+	}else {
+		// お金を減らす
+		err = AssetService.IncreaseMoney(0-payment.Price)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
+			return
+		}
 	}
+	
 	// 在庫を増やす
 	for _, productLog := range productLogs {
 		err = ProductService.IncreaseStock(productLog.ProductId, productLog.Quantity)

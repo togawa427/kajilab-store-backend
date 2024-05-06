@@ -78,6 +78,8 @@ func UpdateUserDebt(c *gin.Context) {
 		return
 	}
 
+	// 「変更後のユーザの残高　-　変更前のユーザの残高」を商店Debtに足す
+
 	c.JSON(http.StatusOK, "success")
 }
 
