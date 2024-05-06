@@ -272,6 +272,7 @@ func CreateProduct(c *gin.Context){
 func BuyProducts(c *gin.Context) {
 	ProductService := service.ProductService{}
 	AssetService := service.AssetService{}
+	UserService := service.UserService{}
 	ProductsBuyRequest := model.ProductsBuyRequest{}
 	err := c.Bind(&ProductsBuyRequest)
 	if err != nil {
@@ -287,10 +288,6 @@ func BuyProducts(c *gin.Context) {
 		totalPrice += productJson.UnitPrice * productJson.Quantity
 	}
 
-	// ユーザ番号からユーザIDを取得
-	// 未実装
-
-	// 購入情報を登録
 	// リクエストの商品情報をデータベースの型へ変換
 	payment := model.Payment{
 		Price: totalPrice,
@@ -298,6 +295,26 @@ func BuyProducts(c *gin.Context) {
 		Method: ProductsBuyRequest.Method,
 		UserId: 0,
 	}
+
+	user := model.User{}
+	// ユーザバーコードがリクエストに含まれる場合ユーザIDを取得
+	if(payment.Method == "card" && ProductsBuyRequest.UserNumber != ""){
+		user, err = UserService.GetUserByBarcode(ProductsBuyRequest.UserNumber)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get user by barcode")
+			return
+		}
+		payment.UserId = int64(user.ID)
+
+		// 残高が足りているかチェック
+		err = UserService.IsEnoughUserDebt(int64(user.ID), totalPrice)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusPaymentRequired, "Not enough user debt")
+			return
+		}
+	}
+
+	// 購入情報を登録
 	// DBへ保存
 	paymentId, err := ProductService.CreatePayment(&payment)
 	if err != nil {
@@ -305,10 +322,7 @@ func BuyProducts(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(paymentId)
-
-
-	// 購入商品情報を登録，在庫を更新
+	// 商品ログを登録，在庫を更新
 	for _, productJson := range productsJson {
 		fmt.Println("start")
 
@@ -327,7 +341,7 @@ func BuyProducts(c *gin.Context) {
 			Stock: productInfo.Stock - productJson.Quantity,
 		}
 
-		// 購入商品情報をDBへ保存
+		// 商品ログをDBへ保存
 		err = ProductService.CreateProductLog(&productLog)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create payment_product")
@@ -342,10 +356,27 @@ func BuyProducts(c *gin.Context) {
 	}
 
 	// お金を減らす
-	err = AssetService.IncreaseMoney(totalPrice)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase money")
-		return
+	if(payment.Method == "card" && ProductsBuyRequest.UserNumber != ""){
+		// カード支払いの時
+		// ユーザのDebtを減らす
+		err = UserService.IncreaseUserDebt(payment.UserId, 0-totalPrice)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
+			return
+		}
+		// 商店のDebtを減らす
+		err = AssetService.IncreaseDebt(0-totalPrice)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease debt")
+			return
+		}
+	} else {
+		// 現金支払いの時は商店残高を増やす
+		err = AssetService.IncreaseMoney(totalPrice)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase money")
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, "success")
