@@ -28,7 +28,7 @@ func (AssetService) IncreaseMoney(money int64) (error) {
 
 	// 現在のお金を取得
 	asset := model.Asset{}
-	result := db.First(&asset)
+	result := db.Last(&asset)
 	if result.Error != nil {
 		fmt.Printf("財産取得失敗 %v", result.Error)
 		return result.Error
@@ -37,6 +37,38 @@ func (AssetService) IncreaseMoney(money int64) (error) {
 	// DBへ更新
 	//result = db.Model(&model.Asset{}).Where("id = 1").Update("money", asset.Money + money)
 	result = db.Create(&model.Asset{Money: asset.Money+money, Debt: asset.Debt})
+	if result.Error != nil {
+		fmt.Printf("財産更新失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
+
+// 残高を増減させる
+func (AssetService) IncreaseDebt(debt int64) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+	
+
+	// 現在のお金を取得
+	asset := model.Asset{}
+	result := db.Last(&asset)
+	if result.Error != nil {
+		fmt.Printf("財産取得失敗 %v", result.Error)
+		return result.Error
+	}
+
+	// DBへ更新
+	//result = db.Model(&model.Asset{}).Where("id = 1").Update("money", asset.Money + money)
+	result = db.Create(&model.Asset{Money: asset.Money, Debt: asset.Debt+debt})
 	if result.Error != nil {
 		fmt.Printf("財産更新失敗 %v", result.Error)
 		return result.Error

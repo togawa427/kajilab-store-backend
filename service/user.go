@@ -87,3 +87,64 @@ func (UserService) UpdateUser(id int64, user *model.User) error {
 	}
 	return nil
 }
+
+// 残高を増減させる
+func (UserService) IncreaseUserDebt(userId int64, debt int64) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+	
+
+	// 現在の残高を取得
+	user := model.User{}
+	result := db.First(&user, userId)
+	if result.Error != nil {
+		fmt.Printf("ユーザ残高取得失敗 %v", result.Error)
+		return result.Error
+	}
+
+	// DBへ更新
+	result = db.Model(&model.User{}).Where("id = ?", userId).Update("debt", user.Debt + debt)
+	//result = db.Create(&model.Asset{Money: .Money+money, Debt: asset.Debt})
+	if result.Error != nil {
+		fmt.Printf("ユーザ残高更新失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}
+
+func (UserService) IsEnoughUserDebt(userId int64, price int64) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	// 現在の残高を取得
+	user := model.User{}
+	result := db.First(&user, userId)
+	if result.Error != nil {
+		fmt.Printf("ユーザ残高取得失敗 %v", result.Error)
+		return result.Error
+	}
+
+	// 残高更新後マイナスになる場合エラー
+	if(user.Debt - price < 0){
+		fmt.Println("ユーザ残高が足りません")
+		err := errors.New("the debt is low")
+		return err
+	}
+	return nil
+}
