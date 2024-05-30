@@ -56,6 +56,7 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, "success")
 }
 
+// ユーザの残高更新(主にチャージ)
 func UpdateUserDebt(c *gin.Context) {
 	UserService := service.UserService{}
 	AssetService := service.AssetService{}

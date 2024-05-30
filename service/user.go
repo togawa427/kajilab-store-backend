@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kajilab-store-backend/model"
 	"os"
+	"strconv"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -108,6 +109,14 @@ func (UserService) UpdateUser(id int64, user *model.User) error {
 		fmt.Printf("ユーザ情報更新失敗 %v", result.Error)
 		return result.Error
 	}
+
+	// ログに出力
+	err = createCloudLog("ユーザID " + strconv.Itoa(int(user.ID)) + " の残高\n" + "更新後：" + strconv.Itoa(int(user.Debt)))
+	if err != nil {
+		fmt.Printf("ログ出力失敗 %v", result.Error)
+		return result.Error
+	}
+
 	return nil
 }
 
@@ -140,6 +149,14 @@ func (UserService) IncreaseUserDebt(userId int64, debt int64) (error) {
 		fmt.Printf("ユーザ残高更新失敗 %v", result.Error)
 		return result.Error
 	}
+
+	// ログに出力
+	err = createCloudLog(user.Name + "の残高\n" + "更新前：" + strconv.Itoa(int(user.Debt)) + "\n更新後：" + strconv.Itoa(int(user.Debt + debt)))
+	if err != nil {
+		fmt.Printf("ログ出力失敗 %v", result.Error)
+		return result.Error
+	}
+
 	return nil
 }
 

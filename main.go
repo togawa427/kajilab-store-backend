@@ -19,6 +19,7 @@ func main() {
 
 	// 環境変数の設定
 	os.Setenv("DB_FILE_NAME", "kajilabstore.db")
+	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "kajilab-store-256c6c01f9cb.json")
 
 	// DBの設定
 	log.Println("Start Database")
