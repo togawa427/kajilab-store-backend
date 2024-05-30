@@ -92,6 +92,12 @@ func UpdateUserDebt(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update asset")
 		return
 	}
+	// 商店残高(money)を増やす
+	err = AssetService.IncreaseMoney(UserUpdateDebtRequest.Debt - beforeUser.Debt)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
+		return
+	}
 
 	c.JSON(http.StatusOK, "success")
 }

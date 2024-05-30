@@ -558,7 +558,7 @@ func DeletePayment(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase user debt")
 			return
 		}
-		// 商店残高を増やす
+		// 商店残高(debt)を増やす
 		err = AssetService.IncreaseDebt(payment.Price)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase debt")
