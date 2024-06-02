@@ -82,6 +82,29 @@ func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
 	return logs, nil
 }
 
+// ユーザIDから購入ログを取得
+func (ProductService) GetBuyLogsByUserId(offset int64, limit int64, userId int64) ([]model.Payment, error){
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	logs := make([]model.Payment, 0)
+	//result := db.Order("name").Find(&products)
+	result := db.Where("user_id = ?", int(userId)).Order("ID desc").Offset(int(offset)).Limit(int(limit)).Find(&logs)
+	if result.Error != nil {
+		fmt.Printf("購入履歴取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	return logs, nil
+}
+
 // IDから商品情報を取得
 func (ProductService) GetProductById(id int64) (model.Product, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})

@@ -177,6 +177,77 @@ func GetBuyLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, resLogs)
 }
 
+// ユーザIDから購入ログの取得
+func GetBuyLogsByUser(c *gin.Context) {
+	ProductService := service.ProductService{}
+
+	// ユーザID取得
+	userId, err := strconv.ParseInt(c.Param("userId"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "productId is not number")
+		return
+	}
+
+	// limitとoffsetの取得
+	limit, err := strconv.ParseInt(c.Query("limit"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
+		return
+	}
+	offset, err := strconv.ParseInt(c.Query("offset"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "offset is not number")
+		return
+	}
+
+	// DBから購入ログ取得
+	logs, err := ProductService.GetBuyLogsByUserId(offset, limit, userId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get logs from DB")
+		return
+	}
+
+	resLogs := []model.BuyLogsGetResponse{}
+	for _, log := range logs {
+
+		// 購入物の商品情報を取得
+		buyProducts, err := ProductService.GetProductLogsBySourceId(int64(log.ID))
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproducts from DB")
+			return
+		}
+		buyProductsJson := []model.BuyProductResponse{}
+		for _, buyProduct := range buyProducts {
+
+			// 商品名を取得
+			productInfo, err := ProductService.GetProductById(int64(buyProduct.ProductId))
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproduct from DB")
+				return
+			}
+
+			buyProductsJson = append(buyProductsJson, model.BuyProductResponse{
+				Id: int64(productInfo.ID),
+				Name: productInfo.Name,
+				Barcode: productInfo.Barcode,
+				Quantity: buyProduct.Quantity,
+				UnitPrice: buyProduct.UnitPrice,
+			})
+		}
+
+		resLogs = append(resLogs, model.BuyLogsGetResponse{
+			Id: int64(log.ID),
+			Price: log.Price,
+			PayAt: log.PayAt,
+			Method: log.Method,
+			UserName: "",
+			Products: buyProductsJson,
+		})
+	}
+
+	c.JSON(http.StatusOK, resLogs)
+}
+
 // 入荷ログ取得API
 func GetArriveLogs(c *gin.Context){
 	ProductService := service.ProductService{}
