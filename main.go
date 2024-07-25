@@ -74,6 +74,7 @@ func SetUpServer() *gin.Engine {
 
 		// assets
 		versionEngine.GET("/assets", controller.GetAsset)
+		versionEngine.GET("/assets/history", controller.GetAssetHistory)
 		versionEngine.PUT("/assets", controller.UpdateAsset)
 
 		// users

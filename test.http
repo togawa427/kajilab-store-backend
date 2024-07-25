@@ -15,7 +15,7 @@ GET {{baseURL}}/api/v1/products/4901071239824
 Get {{baseURL}}/api/v1/products/buy/logs?limit=5
 
 ###
-Get {{baseURL}}/api/v1/products/buy/logs/user/1?limit=10&&offset=0
+Get {{baseURL}}/api/v1/products/buy/logs/user/4?limit=10&&offset=0
 
 ###a
 Get {{baseURL}}/api/v1/products/arrive/logs?limit=10
@@ -114,16 +114,24 @@ DELETE {{baseURL}}/api/v1/products/buy/100000000024
 ###
 DELETE {{baseURL}}/api/v1/products/arrival/200000000001
 
+
+#=========================================
+# users
+#=========================================
+
 ###
 GET {{baseURL}}/api/v1/assets
+
+###aaa
+GET {{baseURL}}/api/v1/assets/history?day=33
 
 ###
 PUT {{baseURL}}/api/v1/assets
 Content-Type: application/json
 
 {
-    "money":29292,
-    "debt": 100
+    "money":46658,
+    "debt": 4440
 }
 
 

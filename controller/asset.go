@@ -5,6 +5,7 @@ import (
 	"kajilab-store-backend/model"
 	"kajilab-store-backend/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,48 @@ func GetAsset(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, jsonAsset)
+}
+
+func GetAssetHistory(c *gin.Context) {
+
+	day, err := strconv.ParseInt(c.Query("day"), 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
+		return
+	}
+
+	AssetService := service.AssetService{}
+
+	// DBから予算情報を取得
+	assets, err := AssetService.GetAssetHistory(day)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get products from DB")
+		return
+	}
+
+	println(assets)
+
+
+	// DBから商品価値を取得
+
+	// データベースの予算情報をレスポンスの型へ変換
+	resAssets := []model.AssetHistoryGetResponse{}
+	for _, asset := range assets {
+		resAssets = append(resAssets, model.AssetHistoryGetResponse{
+			Money: asset.Money,
+			Debt: asset.Debt,
+			Product: 500,
+			// Id: int64(product.ID),
+			// Name: product.Name,
+			// Barcode: product.Barcode,
+			// Price: product.Price,
+			// Stock: product.Stock,
+			// TagId: product.TagId,
+			// ImagePath: product.ImagePath,
+		})
+	}
+
+	c.JSON(http.StatusOK, resAssets)
 }
 
 func UpdateAsset(c *gin.Context) {
