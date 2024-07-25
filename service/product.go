@@ -149,6 +149,35 @@ func (ProductService) GetProductLogsByDay(day int64, productId int64) ([]model.P
 	return logs, nil
 }
 
+// func (ProductService) GetProductsValuesByDay(day int64) ([]int64, error){
+// 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return nil, err
+// 	}
+// 	sqlDB, err := db.DB()
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// 	defer sqlDB.Close()
+
+// 	// 現在の商品価値をDBから取得
+// 	productsValues := make([]int64, 0)
+// 	for i:=0; i<int(day); i++ {
+// 		products := []model.Product{}
+// 		dayAgo := time.Now().AddDate(0, 0, 0-i)
+// 		startOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 0, 0, 0, 0, dayAgo.Location())
+// 		endOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 23, 59, 59, 999999, dayAgo.Location())
+// 		result := db.Where("created_at BETWEEN ? AND ?", startOfDay, endOfDay).Find(&products)
+// 		if result.Error != nil {
+// 			productsValues = append(productsValues, -1)
+// 		} else {
+// 			productsValues = append(productsValues, 1000)
+// 		}
+// 	}
+// 	return productsValues, nil
+// }
+
 // 入荷ログを取得
 func (ProductService) GetArriveLogs(limit int64) ([]model.Arrival, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})

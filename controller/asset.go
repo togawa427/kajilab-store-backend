@@ -6,6 +6,7 @@ import (
 	"kajilab-store-backend/service"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,42 +34,54 @@ func GetAssetHistory(c *gin.Context) {
 
 	day, err := strconv.ParseInt(c.Query("day"), 10, 64)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "day is not number")
+		return
+	}
+	if day < 0 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "day is low")
 		return
 	}
 
 	AssetService := service.AssetService{}
+	//ProductService := service.ProductService{}
 
 	// DBから予算情報を取得
-	assets, err := AssetService.GetAssetHistory(day)
+	dayMargin := int64(30)	// day日前に予算情報がない場合用のマージン(少なくともdayの前30日間で一つは予算情報があるはず)
+	assets, err := AssetService.GetAssetHistory(day + dayMargin)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get products from DB")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get assets from DB")
 		return
 	}
 
-	println(assets)
-
-
 	// DBから商品価値を取得
+	// productsValues, err := ProductService.GetProductsValuesByDay(day)
+	// if err != nil {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get products values from DB")
+	// 	return
+	// }
 
 	// データベースの予算情報をレスポンスの型へ変換
 	resAssets := []model.AssetHistoryGetResponse{}
+	latestMoney := int64(-1)
+	latestDebt := int64(-1)
+	i := 0
 	for _, asset := range assets {
+		currentDate := time.Now().AddDate(0, 0, 0-(int(day+dayMargin)-i))
+		if(asset.Money != -1){
+			// お金情報がない日
+			latestMoney = asset.Money
+			latestDebt = asset.Debt
+		}
 		resAssets = append(resAssets, model.AssetHistoryGetResponse{
-			Money: asset.Money,
-			Debt: asset.Debt,
-			Product: 500,
-			// Id: int64(product.ID),
-			// Name: product.Name,
-			// Barcode: product.Barcode,
-			// Price: product.Price,
-			// Stock: product.Stock,
-			// TagId: product.TagId,
-			// ImagePath: product.ImagePath,
+			Date: currentDate,
+			Money: latestMoney,
+			Debt: latestDebt,
+			Product: -1,
 		})
+		i++
 	}
 
-	c.JSON(http.StatusOK, resAssets)
+	c.JSON(http.StatusOK, resAssets[dayMargin:])
 }
 
 func UpdateAsset(c *gin.Context) {

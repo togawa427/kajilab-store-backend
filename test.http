@@ -116,14 +116,14 @@ DELETE {{baseURL}}/api/v1/products/arrival/200000000001
 
 
 #=========================================
-# users
+# assets
 #=========================================
 
 ###
 GET {{baseURL}}/api/v1/assets
 
-###aaa
-GET {{baseURL}}/api/v1/assets/history?day=33
+###aaaaaaaa
+GET {{baseURL}}/api/v1/assets/history?day=10
 
 ###
 PUT {{baseURL}}/api/v1/assets

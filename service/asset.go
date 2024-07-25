@@ -119,7 +119,7 @@ func (AssetService) GetAssetHistory(day int64) ([]model.Asset, error) {
 	// 現在の予算をDBから取得
 	for i:=0; i<int(day); i++ {
 		asset := model.Asset{}
-		dayAgo := time.Now().AddDate(0, 0, 0-i)
+		dayAgo := time.Now().AddDate(0, 0, 0-(int(day)-i))
 		startOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 0, 0, 0, 0, dayAgo.Location())
 		endOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 23, 59, 59, 999999, dayAgo.Location())
 		result := db.Where("created_at BETWEEN ? AND ?", startOfDay, endOfDay).Last(&asset)
