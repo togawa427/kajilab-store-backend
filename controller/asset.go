@@ -43,7 +43,7 @@ func GetAssetHistory(c *gin.Context) {
 	}
 
 	AssetService := service.AssetService{}
-	//ProductService := service.ProductService{}
+	ProductService := service.ProductService{}
 
 	// DBから予算情報を取得
 	dayMargin := int64(30)	// day日前に予算情報がない場合用のマージン(少なくともdayの前30日間で一つは予算情報があるはず)
@@ -54,11 +54,11 @@ func GetAssetHistory(c *gin.Context) {
 	}
 
 	// DBから商品価値を取得
-	// productsValues, err := ProductService.GetProductsValuesByDay(day)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get products values from DB")
-	// 	return
-	// }
+	productsValues, err := ProductService.GetProductsValuesByDay(day + dayMargin)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get products values from DB")
+		return
+	}
 
 	// データベースの予算情報をレスポンスの型へ変換
 	resAssets := []model.AssetHistoryGetResponse{}
@@ -76,7 +76,7 @@ func GetAssetHistory(c *gin.Context) {
 			Date: currentDate,
 			Money: latestMoney,
 			Debt: latestDebt,
-			Product: -1,
+			Product: productsValues[i],
 		})
 		i++
 	}

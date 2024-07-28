@@ -117,7 +117,7 @@ func (AssetService) GetAssetHistory(day int64) ([]model.Asset, error) {
 
 	assets := make([]model.Asset, 0)
 	// 現在の予算をDBから取得
-	for i:=0; i<int(day); i++ {
+	for i:=0; i<=int(day); i++ {
 		asset := model.Asset{}
 		dayAgo := time.Now().AddDate(0, 0, 0-(int(day)-i))
 		startOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 0, 0, 0, 0, dayAgo.Location())

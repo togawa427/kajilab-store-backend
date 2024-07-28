@@ -244,6 +244,66 @@ func (ProductService) GetArrivalById(id int64) (model.Arrival, error) {
 	return arrival, nil
 }
 
+// X日間のそれぞれの日の商品価値を取得
+func (ProductService) GetProductsValuesByDay(day int64) ([]int64, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	valuesByDay := make([]int64, 0)
+	// 現在の商品価値総額を取得
+	currentProductsValue := int64(0)
+	products := make([]model.Product, 0)
+	//result := db.Order("name").Find(&products)
+	result := db.Find(&products)
+	if result.Error != nil {
+		fmt.Printf("商品取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	for _, product := range products {
+		currentProductsValue += product.Price * product.Stock
+	}
+
+	// 商品価値履歴を取得
+	for i:=0; i<=int(day); i++ {
+		productLogs := make([]model.ProductLog, 0)
+		dayAgo := time.Now().AddDate(0, 0, -i)
+		startOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 0, 0, 0, 0, dayAgo.Location())
+		endOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 23, 59, 59, 999999, dayAgo.Location())
+		// 一日分のログを取得
+		result = db.Where("created_at BETWEEN ? AND ?", startOfDay, endOfDay).Find(&productLogs)
+		valuesByDay = append(valuesByDay, currentProductsValue)
+		if result.Error != nil {
+			// その日のログがない場合次のループにいく
+			continue
+		}
+		// 一日分のログの商品価値情報をvaluesByDayに追加
+		for _, productLog := range productLogs {
+			if (productLog.SourceId >= 200000000000) {
+				// 入荷の場合
+				currentProductsValue -= productLog.UnitPrice*productLog.Quantity
+			} else {
+				// 購入の場合
+				currentProductsValue += productLog.UnitPrice*productLog.Quantity
+			}
+		}
+	}
+
+	// 逆順にする
+	for j := 0; j < len(valuesByDay)/2; j++ {
+		valuesByDay[j], valuesByDay[len(valuesByDay)-j-1] = valuesByDay[len(valuesByDay)-j-1], valuesByDay[j]
+	}
+
+	return valuesByDay, nil
+}
+
 // 商品情報を登録
 func (ProductService) CreateProduct(product *model.Product) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
