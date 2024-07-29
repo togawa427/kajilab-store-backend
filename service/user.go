@@ -59,6 +59,33 @@ func (UserService) GetUserByBarcode (barcode string) (model.User, error) {
 	return user, nil
 }
 
+// ユーザ保有残高の総額を取得
+func (UserService) GetUsersTotalDebt () (int64, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	// 取得
+	users := make([]model.User, 0)
+	result := db.Find(&users)
+	if result.Error != nil {
+		fmt.Printf("ユーザ取得失敗 %v", result.Error)
+		return 0, result.Error
+	}
+	totalDebt := int64(0)
+	for _, user := range users {
+		totalDebt += user.Debt
+	}
+	return totalDebt, nil
+}
+
 // ユーザ情報を登録
 func (UserService) CreateUser(user *model.User) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})

@@ -86,6 +86,7 @@ func GetAssetHistory(c *gin.Context) {
 
 func UpdateAsset(c *gin.Context) {
 	AssetService := service.AssetService{}
+	UserService := service.UserService{}
 	AssetUpdateRequest := model.AssetUpdateRequest{}
 	err := c.Bind(&AssetUpdateRequest)
 	if err != nil {
@@ -95,10 +96,17 @@ func UpdateAsset(c *gin.Context) {
 	}
 
 	// 財産情報更新
+	totalDebt, err := UserService.GetUsersTotalDebt()
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get total debt")
+		return
+	}
+
 	// リクエストの財産情報をデータベースの型へ変換
 	asset := model.Asset{
 		Money: AssetUpdateRequest.Money,
-		Debt: AssetUpdateRequest.Debt,
+		Debt: totalDebt,
 	}
 	// DBへ保存
 	err = AssetService.UpdateAsset(&asset)
