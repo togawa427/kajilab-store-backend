@@ -27,12 +27,15 @@ func main() {
 	if err != nil {
 		// ファイルが存在しないとき初期化を行う
 		SetUpDatabase()
+	} else {
+		UpdateDatabase()
 	}
 
 	// サーバ起動
 	log.Println("Start Server")
 	SetUpServer().Run(":8080")
 	// v1.GET("/list/simultaneous/:user_id", controller.SimultaneousStayUserList
+	
 }
 
 func SetUpServer() *gin.Engine {
@@ -88,6 +91,16 @@ func SetUpServer() *gin.Engine {
 	}
 
 	return engine
+}
+
+func UpdateDatabase() {
+	log.Println("update database")
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db.AutoMigrate(&model.Product{})
 }
 
 func SetUpDatabase() {

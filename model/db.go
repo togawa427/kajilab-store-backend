@@ -13,6 +13,9 @@ type Product struct {
 	Price 		int64
 	Stock		int64
 	TagId		int64
+	IsSold	bool `gorm:"default:true"`
+	WarningStock int64 `gorm:"default:0"`
+	SafetyStock int64 `gorm:"default:1"`
 	ImagePath	string
 }
 
