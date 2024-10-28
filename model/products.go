@@ -100,8 +100,11 @@ type ProductUpdateRequest struct {
 	Name   		string 	`json:"name"`
 	Barcode 	int64 	`json:"barcode"`
 	Price 		int64  	`json:"price"`
-	Stock 		int64 	`json:"stock"`
-	TagId 		int64 	`json:"tag_id"`
+	Stock 		*int64 	`json:"stock"`
+	TagId 		*int64 	`json:"tag_id"`
+	IsSold 		*bool 		`json:"is_sold"`
+	WarningStock 	*int64 	`json:"warning_stock"`
+	SafetyStock 	*int64 	`json:"safety_stock"`
 }
 
 type ProductImageUpdateRequest struct {

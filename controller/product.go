@@ -533,15 +533,33 @@ func UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	// 商品情報更新
-	// リクエストの商品情報をデータベースの型へ変換
-	product := model.Product{
-		Name: ProductUpdateRequest.Name,
-		Barcode: ProductUpdateRequest.Barcode,
-		Price: ProductUpdateRequest.Price,
-		Stock: ProductUpdateRequest.Stock,
-		TagId: ProductUpdateRequest.TagId,
+	// 現在の商品情報を取得
+	product, err := ProductService.GetProductById(ProductUpdateRequest.Id)
+	if (err != nil) {
+		c.AbortWithStatusJSON(http.StatusBadRequest, "product not found")
+    return
 	}
+
+	// 値が存在するフィールドのみ更新
+	product.Name = ProductUpdateRequest.Name
+	product.Barcode = ProductUpdateRequest.Barcode
+	product.Price = ProductUpdateRequest.Price
+	if ProductUpdateRequest.Stock != nil {
+		product.Stock = *ProductUpdateRequest.Stock // nilでない場合のみ更新
+	}
+	if ProductUpdateRequest.TagId != nil {
+		product.TagId = *ProductUpdateRequest.TagId
+	}
+	if ProductUpdateRequest.IsSold != nil {
+		product.IsSold = *ProductUpdateRequest.IsSold
+	}
+	if ProductUpdateRequest.WarningStock != nil {
+		product.WarningStock = *ProductUpdateRequest.WarningStock
+	}
+	if ProductUpdateRequest.SafetyStock != nil {
+		product.SafetyStock = *ProductUpdateRequest.SafetyStock
+	}
+
 	// DBへ保存
 	err = ProductService.UpdateProduct(ProductUpdateRequest.Id, &product)
 	if err != nil {
