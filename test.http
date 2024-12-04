@@ -5,14 +5,14 @@
 ###
 Get {{baseURL}}/api/v1/products?limit=100&&offset=0
 
-###
+###a
 GET {{baseURL}}/api/v1/products/4901071239824
 
 ###
 #GET {{baseURL}}/api/v1/products/stock/3?day=1
 
 ###
-Get {{baseURL}}/api/v1/products/buy/logs?limit=5
+Get {{baseURL}}/api/v1/products/buy/logs?limit=50
 
 ###
 Get {{baseURL}}/api/v1/products/buy/logs/user/4?limit=10&&offset=0
@@ -92,11 +92,34 @@ Content-Type: application/json
 
 {
     "id":2,
+    "is_sold":true,
+    "warning_stock":2,
+    "safety_stock":4
+}
+
+###
+PUT {{baseURL}}/api/v1/products
+Content-Type: application/json
+
+{
+    "id":115,
+    "barcode":4901071246228
+}
+
+###
+PUT {{baseURL}}/api/v1/products
+Content-Type: application/json
+
+{
+    "id":2,
     "name": "パックごはん300g",
     "barcode":4562273380648,
     "price":140,
-    "stock":0,
-    "tag_id":2
+    "stock":2,
+    "tag_id":4,
+    "warning_stock":1,
+    "safety_stock":3,
+    "is_sold":false
 }
 
 ###
@@ -122,16 +145,15 @@ DELETE {{baseURL}}/api/v1/products/arrival/200000000001
 ###
 GET {{baseURL}}/api/v1/assets
 
-###aaaaaaaa
-GET {{baseURL}}/api/v1/assets/history?day=10
+###aaaaaaaaaaaa
+GET {{baseURL}}/api/v1/assets/history?day=100
 
 ###
 PUT {{baseURL}}/api/v1/assets
 Content-Type: application/json
 
 {
-    "money":46658,
-    "debt": 4440
+    "money":45093
 }
 
 
@@ -168,6 +190,9 @@ Content-Type: application/json
     "id":1,
     "barcode":"1080123456788"
 }
+
+###
+GET {{baseURL}}/api/v1/storage
 
 
 
