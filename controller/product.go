@@ -122,15 +122,25 @@ func GetProductStockLogsById(c *gin.Context) {
 func GetBuyLogs(c *gin.Context) {
 	ProductService := service.ProductService{}
 
-	// limitの取得
+	// クエリパラメータの取得
+	// limit
 	limit, err := strconv.ParseInt(c.Query("limit"), 10, 64)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
-		return
+		limit = 0
+	}
+	// year
+	year, err := strconv.ParseInt(c.Query("year"), 10, 64)
+	if err != nil {
+		year = 0
+	}
+	// month
+	month, err := strconv.ParseInt(c.Query("month"), 10, 64)
+	if err != nil {
+		month = 0
 	}
 
 	// DBから購入ログ取得
-	logs, err := ProductService.GetBuyLogs(limit)
+	logs, err := ProductService.GetBuyLogs(limit, year, month)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get logs from DB")
 		return
@@ -258,6 +268,7 @@ func GetArriveLogs(c *gin.Context){
 		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
 		return
 	}
+	// 
 
 	// 最終的に返す値
 	logsJson := []model.ArriveLogGetResponse{}

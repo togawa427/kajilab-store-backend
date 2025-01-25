@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kajilab-store-backend/model"
 	"os"
+	"strconv"
 	"time"
 
 	"gorm.io/driver/sqlite"
@@ -60,7 +61,7 @@ func (ProductService) GetProductByBarcode (barcode int64) (model.Product, error)
 }
 
 // 購入ログを取得
-func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
+func (ProductService) GetBuyLogs(limit int64, year int64, month int64) ([]model.Payment, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -73,8 +74,18 @@ func (ProductService) GetBuyLogs(limit int64) ([]model.Payment, error){
 	defer sqlDB.Close()
 
 	logs := make([]model.Payment, 0)
+
+	if limit != 0 {
+		db = db.Limit(int(limit))
+	}
+	if year != 0 {
+		db = db.Where("strftime('%Y', pay_at) = ?", strconv.Itoa(int(year)))
+	}
+	if month != 0 {
+		db = db.Where("strftime('%m', pay_at) = ?", fmt.Sprintf("%02d", month))
+	}
 	//result := db.Order("name").Find(&products)
-	result := db.Order("ID desc").Limit(int(limit)).Find(&logs)
+	result := db.Order("ID desc").Find(&logs)
 	if result.Error != nil {
 		fmt.Printf("購入履歴取得失敗 %v", result.Error)
 		return nil, result.Error
