@@ -426,7 +426,7 @@ func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
 	defer sqlDB.Close()
 
 	// 商品情報をDBへ登録
-	result := db.Model(&model.Product{}).Where("id = ?", id).Updates(&product)
+	result := db.Model(&model.Product{}).Where("id = ?", id).Select("*").Updates(&product)
 	if result.Error != nil {
 		fmt.Printf("商品情報更新失敗 %v", result.Error)
 		return result.Error

@@ -552,11 +552,17 @@ func UpdateProduct(c *gin.Context) {
 	}
 
 	// 値が存在するフィールドのみ更新
-	product.Name = ProductUpdateRequest.Name
-	product.Barcode = ProductUpdateRequest.Barcode
-	product.Price = ProductUpdateRequest.Price
+	if ProductUpdateRequest.Name != nil {
+		product.Name = *ProductUpdateRequest.Name	// nilでない場合のみ更新
+	}
+	if ProductUpdateRequest.Barcode != nil {
+		product.Barcode = *ProductUpdateRequest.Barcode
+	}
+	if ProductUpdateRequest.Price != nil {
+		product.Price = *ProductUpdateRequest.Price
+	}
 	if ProductUpdateRequest.Stock != nil {
-		product.Stock = *ProductUpdateRequest.Stock // nilでない場合のみ更新
+		product.Stock = *ProductUpdateRequest.Stock
 	}
 	if ProductUpdateRequest.TagId != nil {
 		product.TagId = *ProductUpdateRequest.TagId

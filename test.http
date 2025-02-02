@@ -1,6 +1,6 @@
 @baseURL= http://localhost:8080
 #@baseURL= http://163.44.99.95:8080
-#@baseURL=https://kjlbstore-backend.kajilab.dev
+# @baseURL=https://kjlbstore-backend.kajilab.dev
 
 ###
 Get {{baseURL}}/api/v1/products?limit=100&&offset=0
@@ -12,7 +12,7 @@ GET {{baseURL}}/api/v1/products/4901071239824
 #GET {{baseURL}}/api/v1/products/stock/3?day=1
 
 ###
-Get {{baseURL}}/api/v1/products/buy/logs?limit=50
+Get {{baseURL}}/api/v1/products/buy/logs?year=2024&&month=12
 
 ###
 Get {{baseURL}}/api/v1/products/buy/logs/user/4?limit=10&&offset=0
@@ -102,10 +102,12 @@ PUT {{baseURL}}/api/v1/products
 Content-Type: application/json
 
 {
-    "id":115,
-    "barcode":4901071246228
+    "id":4,
+    "barcode": 4897036691012,
+    "stock":0
 }
 
+# 在庫0で更新できるようにしたいな
 ###
 PUT {{baseURL}}/api/v1/products
 Content-Type: application/json
@@ -153,7 +155,7 @@ PUT {{baseURL}}/api/v1/assets
 Content-Type: application/json
 
 {
-    "money":45093
+    "money":38484
 }
 
 
