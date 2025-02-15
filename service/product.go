@@ -15,7 +15,7 @@ import (
 type ProductService struct{}
 
 // 全ての商品を取得する
-func (ProductService) GetAllProducts(limit int64, offset int64) ([]model.Product, error){
+func (ProductService) GetAllProducts(limit int64, offset int64, updateDays int64) ([]model.Product, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -28,8 +28,19 @@ func (ProductService) GetAllProducts(limit int64, offset int64) ([]model.Product
 	defer sqlDB.Close()
 
 	products := make([]model.Product, 0)
-	//result := db.Order("name").Find(&products)
-	result := db.Order("stock DESC").Offset(int(offset)).Limit(int(limit)).Find(&products)
+	q := db
+	if limit != 0 {
+		q = q.Limit(int(limit))
+	}
+	if offset != 0 {
+		q = q.Offset(int(offset))
+	}
+	if updateDays != 0 {
+		fromDate := time.Now().AddDate(0, 0, -int(updateDays))
+		q = q.Where("updated_at > ?", fromDate)
+	}
+
+	result := q.Order("stock DESC").Find(&products)
 	if result.Error != nil {
 		fmt.Printf("商品取得失敗 %v", result.Error)
 		return nil, result.Error

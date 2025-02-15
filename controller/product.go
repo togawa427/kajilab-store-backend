@@ -22,17 +22,19 @@ func GetAllProducts(c *gin.Context) {
 	// limitとoffsetの取得
 	limit, err := strconv.ParseInt(c.Query("limit"), 10, 64)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
-		return
+		limit = 100
 	}
 	offset, err := strconv.ParseInt(c.Query("offset"), 10, 64)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "offset is not number")
-		return
+		offset = 0
+	}
+	updateDays, err := strconv.ParseInt(c.Query("update_days"), 10, 64)
+	if err != nil {
+		updateDays = 0
 	}
 
 	// DBから商品情報取得
-	products, err := ProductService.GetAllProducts(limit, offset)
+	products, err := ProductService.GetAllProducts(limit, offset, updateDays)
 	if err != nil {
 		fmt.Println(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get products from DB")
