@@ -90,10 +90,10 @@ func (ProductService) GetBuyLogs(limit int64, year int64, month int64) ([]model.
 		db = db.Limit(int(limit))
 	}
 	if year != 0 {
-		db = db.Where("strftime('%Y', pay_at) = ?", strconv.Itoa(int(year)))
+		db = db.Where("strftime('%Y', pay_at, 'localtime') = ?", strconv.Itoa(int(year)))
 	}
 	if month != 0 {
-		db = db.Where("strftime('%m', pay_at) = ?", fmt.Sprintf("%02d", month))
+		db = db.Where("strftime('%m', pay_at, 'localtime') = ?", fmt.Sprintf("%02d", month))
 	}
 	//result := db.Order("name").Find(&products)
 	result := db.Order("ID desc").Find(&logs)
