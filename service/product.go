@@ -37,7 +37,7 @@ func (ProductService) GetAllProducts(limit int64, offset int64, updateDays int64
 	}
 	if updateDays != 0 {
 		fromDate := time.Now().AddDate(0, 0, -int(updateDays))
-		q = q.Where("updated_at > ?", fromDate)
+		q = q.Where("updated_at > ? OR stock > ?", fromDate, 0)
 	}
 
 	result := q.Order("stock DESC").Find(&products)
