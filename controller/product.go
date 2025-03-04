@@ -28,7 +28,7 @@ func GetAllProducts(c *gin.Context) {
 	if err != nil {
 		offset = 0
 	}
-	updateDays, err := strconv.ParseInt(c.Query("update_days"), 10, 64)
+	updateDays, err := strconv.ParseInt(c.Query("updated_days"), 10, 64)
 	if err != nil {
 		updateDays = 0
 	}
