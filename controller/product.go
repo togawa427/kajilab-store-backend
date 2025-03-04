@@ -180,6 +180,7 @@ func GetBuyLogs(c *gin.Context) {
 			Id: int64(log.ID),
 			Price: log.Price,
 			PayAt: log.PayAt,
+			PayAtStr: log.PayAt.Format("2006/01/02 15:04:05.000"),
 			Method: log.Method,
 			UserName: "",
 			Products: buyProductsJson,
