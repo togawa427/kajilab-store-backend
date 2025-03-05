@@ -3,7 +3,7 @@
 # @baseURL=https://kjlbstore-backend.kajilab.dev
 
 ###
-Get {{baseURL}}/api/v1/products?limit=100&&offset=0
+Get {{baseURL}}/api/v1/products?limit=100&&offset=0&&updated_days=1
 
 ###a
 GET {{baseURL}}/api/v1/products/4901071239824
@@ -12,7 +12,7 @@ GET {{baseURL}}/api/v1/products/4901071239824
 #GET {{baseURL}}/api/v1/products/stock/3?day=1
 
 ###
-Get {{baseURL}}/api/v1/products/buy/logs?year=2024&&month=12
+Get {{baseURL}}/api/v1/products/buy/logs?year=2024&&month=10
 
 ###
 Get {{baseURL}}/api/v1/products/buy/logs/user/4?limit=10&&offset=0
@@ -47,9 +47,31 @@ POST {{baseURL}}/api/v1/products/buy
 Content-Type: application/json
 
 {
-    "pay_at": "2024-02-06T23:32:37.115934+09:00",
+    "pay_at": "2025-02-15T23:32:37.115934+09:00",
     "method": "card",
     "user_number": "1080123456788",
+    "products": [
+        {
+            "id": 12,
+            "quantity": 1,
+            "unit_price":120
+        },
+        {
+            "id": 9,
+            "quantity": 2,
+            "unit_price":120
+        }
+    ]
+}
+
+###aaaaaaaa
+POST {{baseURL}}/api/v1/products/buy
+Content-Type: application/json
+
+{
+    "pay_at": "2025-02-28T23:32:37.115934+09:00",
+    "method": "money",
+    "user_number": "",
     "products": [
         {
             "id": 12,
@@ -192,6 +214,28 @@ Content-Type: application/json
     "id":1,
     "barcode":"1080123456788"
 }
+
+#=========================================
+# tags
+#=========================================
+
+###a
+GET {{baseURL}}/api/v1/tags
+
+###
+POST {{baseURL}}/api/v1/tags
+Content-Type: application/json
+
+{
+    "tag": {
+        "name": "ドリンク"
+    }
+}
+
+
+#=========================================
+# storages
+#=========================================
 
 ###
 GET {{baseURL}}/api/v1/storage

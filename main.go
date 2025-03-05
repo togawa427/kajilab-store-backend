@@ -86,6 +86,10 @@ func SetUpServer() *gin.Engine {
 		versionEngine.PUT("/users/debt", controller.UpdateUserDebt)
 		versionEngine.PUT("/users/barcode", controller.UpdateUserBarcode)
 
+		// tags
+		versionEngine.GET("/tags", controller.GetTags)
+		versionEngine.POST("/tags", controller.CreateTag)
+
 		versionEngine.GET("/storage", controller.GetStorage)
 
 		//versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
@@ -103,6 +107,8 @@ func UpdateDatabase() {
 	}
 
 	db.AutoMigrate(&model.Product{})
+	db.AutoMigrate(&model.Tag{})
+	db.AutoMigrate(&model.TagMap{})
 }
 
 func SetUpDatabase() {
@@ -121,6 +127,8 @@ func SetUpDatabase() {
 	db.AutoMigrate(&model.ArrivalProduct{})
 	db.AutoMigrate(&model.User{})
 	db.AutoMigrate(&model.ProductLog{})
+	db.AutoMigrate(&model.Tag{})
+	db.AutoMigrate(&model.TagMap{})
 
 	// サンプルデータの挿入
 	db.Create(&model.Product{Name: "じゃがりこサラダ味", Barcode: 134912341234, Price: 120, Stock: 9, TagId: 1, ImagePath: "public/images/jagariko.jpg"})

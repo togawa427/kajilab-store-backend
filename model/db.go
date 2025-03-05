@@ -69,3 +69,14 @@ type User struct {
 	Debt 		int64
 	Barcode string
 }
+
+type Tag struct {
+	gorm.Model
+	Name 			string
+}
+
+type TagMap struct {
+	gorm.Model
+	ProductID int64
+	TagID 		int64
+}
