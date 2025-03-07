@@ -65,11 +65,16 @@ type ArriveProductJson struct {
 	Value 		int64 	`json:"value"`
 }
 
+type ProductCreateRequestTag struct {
+	Name string `json:"name"`
+}
+
 type ProductCreateRequest struct {
 	Name   		string 	`json:"name"`
 	Barcode 	int64 	`json:"barcode"`
 	Price 		int64  	`json:"price"`
 	TagId 		int64 	`json:"tag_id"`
+	Tags			[]ProductCreateRequestTag	`json:"tags"`
 }
 
 type ProductsBuyRequest struct {

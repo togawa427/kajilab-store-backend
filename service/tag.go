@@ -37,6 +37,30 @@ func (TagService) GetTags() ([]model.Tag, error){
 	return tags, nil
 }
 
+// タグ名からタグ情報を取得
+func (TagService) GetTagByName(name string) (*model.Tag, error){
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	tag := model.Tag{}
+	q := db
+
+	result := q.Where("name = ?", name).Take(&tag)
+	if result.Error != nil {
+		fmt.Printf("タグ取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	return &tag, nil
+}
+
 // タグ情報を登録
 func (TagService) CreateTag(tag *model.Tag) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})

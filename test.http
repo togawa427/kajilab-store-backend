@@ -25,8 +25,8 @@ POST {{baseURL}}/api/v1/products HTTP/1.1
 Content-Type: application/json
 
 {
-    "name":"チルソンサイダー",
-    "barcode":8801056192013,
+    "name":"チルソンサイー",
+    "barcode":8801056192011,
     "price":90,
     "tag_id":1
 }
@@ -36,10 +36,14 @@ POST {{baseURL}}/api/v1/products HTTP/1.1
 Content-Type: application/json
 
 {
-    "name":"飲み干す一杯担々麺",
-    "barcode": 4901071278236,
-    "price":150,
-    "tag_id":1
+  "name":"電子ポップコーン",
+  "barcode": 4901071278111,
+  "price":100,
+  "tag_id":1,
+  "tags": [
+    {"name": "お菓子"},
+    {"name": "ドリンク"}
+  ]
 }
 
 ###aaaaaaaa

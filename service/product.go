@@ -327,11 +327,11 @@ func (ProductService) GetProductsValuesByDay(day int64) ([]int64, error) {
 }
 
 // 商品情報を登録
-func (ProductService) CreateProduct(product *model.Product) error {
+func (ProductService) CreateProduct(product *model.Product) (*model.Product, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
-		return err
+		return nil, err
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
@@ -345,16 +345,16 @@ func (ProductService) CreateProduct(product *model.Product) error {
 	if result.Error == nil {
 		err := errors.New("the barcode is existing")
 		fmt.Printf("%v",err)
-		return err
+		return nil, err
 	}
 
 	// 商品をDBへ登録
 	result = db.Create(product)
 	if result.Error != nil {
-		fmt.Printf("入荷登録失敗 %v", result.Error)
-		return result.Error
+		fmt.Printf("商品登録失敗 %v", result.Error)
+		return nil, result.Error
 	}
-	return nil
+	return product,nil
 }
 
 // 購入情報を登録

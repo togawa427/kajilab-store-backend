@@ -327,6 +327,8 @@ func GetArriveLogs(c *gin.Context){
 func CreateProduct(c *gin.Context){
 	ProductService := service.ProductService{}
 	ProductCreateRequest := model.ProductCreateRequest{}
+	TagService := service.TagService{}
+	TagMapService := service.TagMapService{}
 	err := c.Bind(&ProductCreateRequest)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "request is not correct")
@@ -343,14 +345,32 @@ func CreateProduct(c *gin.Context){
 		ImagePath: strconv.Itoa(int(ProductCreateRequest.Barcode))+ ".jpg",
 	}
 
-	err = ProductService.CreateProduct(&product)
+	createdProduct, err := ProductService.CreateProduct(&product)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create product")
 		return
 	}
 
-	c.JSON(http.StatusOK, "success")
+	tagMap := model.TagMap{}
+	for _, reqTag := range ProductCreateRequest.Tags {
+		tag, err := TagService.GetTagByName(reqTag.Name)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal register tag")
+			return
+		}
 
+		tagMap = model.TagMap{
+			ProductID: int64(createdProduct.ID),
+			TagID: int64(tag.ID),
+		}
+		_, err = TagMapService.CreateTagMap(&tagMap)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create tag_map")
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, "success")
 }
 
 // 商品購入時API
