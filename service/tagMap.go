@@ -59,3 +59,49 @@ func (TagMapService) CreateTagMap(tagMap *model.TagMap) (*model.TagMap, error) {
 	}
 	return tagMap, nil
 }
+
+// タグマップ情報の更新
+func (TagMapService) UpdateTagMap(id int64,tagMap *model.TagMap) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	// 商品情報をDBへ登録
+	result := db.Model(&model.TagMap{}).Where("id = ?", id).Select("*").Updates(&tagMap)
+	if result.Error != nil {
+		fmt.Printf("商品情報更新失敗 %v", result.Error)
+		return result.Error
+	}
+
+	return nil
+}
+
+// タグマップ情報の削除
+// 入荷情報の削除
+func (TagMapService) DeleteTagMapByProductId(productId int64) (error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	// 入荷商品情報をDBから削除
+	result := db.Where("product_id = ?", productId).Delete(&model.TagMap{})
+	if result.Error != nil {
+		fmt.Printf("タグマップ情報削除失敗 %v", result.Error)
+		return result.Error
+	}
+	return nil
+}

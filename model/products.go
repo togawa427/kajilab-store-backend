@@ -112,6 +112,7 @@ type ProductUpdateRequest struct {
 	IsSold 		*bool 		`json:"is_sold"`
 	WarningStock 	*int64 	`json:"warning_stock"`
 	SafetyStock 	*int64 	`json:"safety_stock"`
+	Tags *[]TagPostRequestTag `json:"tags"`
 }
 
 type ProductImageUpdateRequest struct {

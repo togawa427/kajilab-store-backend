@@ -582,6 +582,8 @@ func ArriveProducts(c *gin.Context) {
 // 商品情報更新API
 func UpdateProduct(c *gin.Context) {
 	ProductService := service.ProductService{}
+	TagMapService := service.TagMapService{}
+	TagService := service.TagService{}
 	ProductUpdateRequest := model.ProductUpdateRequest{}
 	err := c.Bind(&ProductUpdateRequest)
 	if err != nil {
@@ -628,6 +630,28 @@ func UpdateProduct(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update product")
 		return
+	}
+
+	// タグマップの保存
+	if ProductUpdateRequest.Tags != nil {
+		// 現在のタグマップを削除
+		err = TagMapService.DeleteTagMapByProductId(ProductUpdateRequest.Id)
+		reqTags := []model.TagPostRequestTag{}
+		reqTags = *ProductUpdateRequest.Tags
+		for _, tagMap := range reqTags {
+			// タグ名からタグの取得
+			tmpTag, err := TagService.GetTagByName(*tagMap.Name)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get tag")
+				return
+			}
+			// タグマップの登録
+			_, err = TagMapService.CreateTagMap(&model.TagMap{ProductID: ProductUpdateRequest.Id, TagID: int64(tmpTag.ID)})
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal register tag map")
+				return
+			}
+		}
 	}
 	
 	productLog := model.ProductLog{
