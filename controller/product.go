@@ -18,6 +18,8 @@ import (
 
 func GetAllProducts(c *gin.Context) {
 	ProductService := service.ProductService{}
+	TagService := service.TagService{}
+	TagMapService := service.TagMapService{}
 
 	// limitとoffsetの取得
 	limit, err := strconv.ParseInt(c.Query("limit"), 10, 64)
@@ -42,8 +44,28 @@ func GetAllProducts(c *gin.Context) {
 	}
 
 	resProducts := []model.AllProductsGetResponse{}
-
 	for _, product := range products {
+		// 商品IDからタグマップ取得
+		tagMaps, err := TagMapService.GetTagMapByProductId(int64(product.ID))
+		if err != nil {
+			fmt.Println(err)
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get tag maps")
+			return
+		}
+		// タグIDからタグ取得
+		resTags := []model.TagGetResponseTag{}
+		for _, tagMap := range tagMaps {
+			resTag, err := TagService.GetTagById(tagMap.TagID)
+			if err != nil {
+				fmt.Println(err)
+				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get tag")
+				return
+			}
+			resTags = append(resTags, model.TagGetResponseTag{
+				Name: resTag.Name,
+			})
+		}
+
 		resProducts = append(resProducts, model.AllProductsGetResponse{
 			Id: int64(product.ID),
 			Name: product.Name,
@@ -52,6 +74,7 @@ func GetAllProducts(c *gin.Context) {
 			Stock: product.Stock,
 			TagId: product.TagId,
 			ImagePath: product.ImagePath,
+			Tags: resTags,
 		})
 	}
 

@@ -13,7 +13,7 @@ import (
 type TagService struct{
 }
 
-// 全ての商品を取得する
+// 全てのタグを取得する
 func (TagService) GetTags() ([]model.Tag, error){
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
@@ -35,6 +35,30 @@ func (TagService) GetTags() ([]model.Tag, error){
 		return nil, result.Error
 	}
 	return tags, nil
+}
+
+// タグIDからタグ情報を取得
+func (TagService) GetTagById(id int64) (*model.Tag, error){
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	tag := model.Tag{}
+	q := db
+
+	result := q.First(&tag, id)
+	if result.Error != nil {
+		fmt.Printf("タグ取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	return &tag, nil
 }
 
 // タグ名からタグ情報を取得
