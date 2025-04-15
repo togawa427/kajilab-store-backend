@@ -5,11 +5,12 @@ import (
 	// "kajilab-store-backend/service"
 
 	"fmt"
-	"kajilab-store-backend/model"
-	"kajilab-store-backend/service"
 	"net/http"
 	"strconv"
 	"time"
+
+	"kajilab-store-backend/model"
+	"kajilab-store-backend/service"
 
 	// // "strconv"
 
@@ -43,7 +44,15 @@ func GetAllProducts(c *gin.Context) {
 		return
 	}
 
-	resProducts := []model.AllProductsGetResponse{}
+	// DBから商品数取得
+	totalCount, err := ProductService.CountProducts(updateDays)
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal count products from DB")
+		return
+	}
+
+	resProducts := []model.ProductsGetResponseProduct{}
 	for _, product := range products {
 		// 商品IDからタグマップ取得
 		tagMaps, err := TagMapService.GetTagMapByProductId(int64(product.ID))
@@ -66,19 +75,24 @@ func GetAllProducts(c *gin.Context) {
 			})
 		}
 
-		resProducts = append(resProducts, model.AllProductsGetResponse{
-			Id: int64(product.ID),
-			Name: product.Name,
-			Barcode: product.Barcode,
-			Price: product.Price,
-			Stock: product.Stock,
-			TagId: product.TagId,
+		resProducts = append(resProducts, model.ProductsGetResponseProduct{
+			Id:        int64(product.ID),
+			Name:      product.Name,
+			Barcode:   product.Barcode,
+			Price:     product.Price,
+			Stock:     product.Stock,
+			TagId:     product.TagId,
 			ImagePath: product.ImagePath,
-			Tags: resTags,
+			Tags:      resTags,
 		})
 	}
 
-	c.JSON(http.StatusOK, resProducts)
+	response := model.ProductsGetResponse{
+		Products:   resProducts,
+		TotalCount: totalCount,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // バーコードから商品取得API
@@ -97,12 +111,12 @@ func GetProductByBarcode(c *gin.Context) {
 	}
 	// レスポンスの型に変換
 	productJson := model.ProductGetResponse{
-		Id: int64(product.ID),
-		Name: product.Name,
-		Barcode: product.Barcode,
-		Price: product.Price,
-		Stock: product.Stock,
-		TagId: product.TagId,
+		Id:        int64(product.ID),
+		Name:      product.Name,
+		Barcode:   product.Barcode,
+		Price:     product.Price,
+		Stock:     product.Stock,
+		TagId:     product.TagId,
 		ImagePath: product.ImagePath,
 	}
 
@@ -141,7 +155,6 @@ func GetProductStockLogsById(c *gin.Context) {
 	}
 	fmt.Println(resLogs)
 }
-
 
 // 購入ログの取得
 func GetBuyLogs(c *gin.Context) {
@@ -191,20 +204,20 @@ func GetBuyLogs(c *gin.Context) {
 			}
 
 			buyProductsJson = append(buyProductsJson, model.BuyProductResponse{
-				Id: int64(productInfo.ID),
-				Name: productInfo.Name,
-				Barcode: productInfo.Barcode,
-				Quantity: buyProduct.Quantity,
+				Id:        int64(productInfo.ID),
+				Name:      productInfo.Name,
+				Barcode:   productInfo.Barcode,
+				Quantity:  buyProduct.Quantity,
 				UnitPrice: buyProduct.UnitPrice,
 			})
 		}
 
 		resLogs = append(resLogs, model.BuyLogsGetResponse{
-			Id: int64(log.ID),
-			Price: log.Price,
-			PayAt: log.PayAt,
+			Id:       int64(log.ID),
+			Price:    log.Price,
+			PayAt:    log.PayAt,
 			PayAtStr: log.PayAt.Format("2006/01/02 15:04:05.000"),
-			Method: log.Method,
+			Method:   log.Method,
 			UserName: "",
 			Products: buyProductsJson,
 		})
@@ -263,19 +276,19 @@ func GetBuyLogsByUser(c *gin.Context) {
 			}
 
 			buyProductsJson = append(buyProductsJson, model.BuyProductResponse{
-				Id: int64(productInfo.ID),
-				Name: productInfo.Name,
-				Barcode: productInfo.Barcode,
-				Quantity: buyProduct.Quantity,
+				Id:        int64(productInfo.ID),
+				Name:      productInfo.Name,
+				Barcode:   productInfo.Barcode,
+				Quantity:  buyProduct.Quantity,
 				UnitPrice: buyProduct.UnitPrice,
 			})
 		}
 
 		resLogs = append(resLogs, model.BuyLogsGetResponse{
-			Id: int64(log.ID),
-			Price: log.Price,
-			PayAt: log.PayAt,
-			Method: log.Method,
+			Id:       int64(log.ID),
+			Price:    log.Price,
+			PayAt:    log.PayAt,
+			Method:   log.Method,
 			UserName: "",
 			Products: buyProductsJson,
 		})
@@ -285,7 +298,7 @@ func GetBuyLogsByUser(c *gin.Context) {
 }
 
 // 入荷ログ取得API
-func GetArriveLogs(c *gin.Context){
+func GetArriveLogs(c *gin.Context) {
 	ProductService := service.ProductService{}
 
 	// limitの取得
@@ -294,7 +307,7 @@ func GetArriveLogs(c *gin.Context){
 		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
 		return
 	}
-	// 
+	//
 
 	// 最終的に返す値
 	logsJson := []model.ArriveLogGetResponse{}
@@ -325,19 +338,19 @@ func GetArriveLogs(c *gin.Context){
 			}
 
 			arriveProductsJson = append(arriveProductsJson, model.ArriveProductJson{
-				Id: int64(productInfo.ID,),
-				Name: productInfo.Name,
-				Barcode: int64(productInfo.Barcode),
+				Id:       int64(productInfo.ID),
+				Name:     productInfo.Name,
+				Barcode:  int64(productInfo.Barcode),
 				Quantity: arriveProduct.Quantity,
-				Value: productInfo.Price,
+				Value:    productInfo.Price,
 			})
-			totalValue = totalValue + (productInfo.Price*arriveProduct.Quantity)
+			totalValue = totalValue + (productInfo.Price * arriveProduct.Quantity)
 		}
 
 		logsJson = append(logsJson, model.ArriveLogGetResponse{
-			Id: int64(log.ID),
-			Money: log.Money,
-			Value: totalValue,
+			Id:       int64(log.ID),
+			Money:    log.Money,
+			Value:    totalValue,
 			ArriveAt: log.ArriveAt,
 			Products: arriveProductsJson,
 		})
@@ -347,7 +360,7 @@ func GetArriveLogs(c *gin.Context){
 }
 
 // 商品登録API
-func CreateProduct(c *gin.Context){
+func CreateProduct(c *gin.Context) {
 	ProductService := service.ProductService{}
 	ProductCreateRequest := model.ProductCreateRequest{}
 	TagService := service.TagService{}
@@ -360,12 +373,12 @@ func CreateProduct(c *gin.Context){
 
 	// リクエストの商品情報をデータベースの型へ変換
 	product := model.Product{
-		Name: ProductCreateRequest.Name,
-		Barcode: ProductCreateRequest.Barcode,
-		Price: ProductCreateRequest.Price,
-		Stock: 0,
-		TagId: ProductCreateRequest.TagId,
-		ImagePath: strconv.Itoa(int(ProductCreateRequest.Barcode))+ ".jpg",
+		Name:      ProductCreateRequest.Name,
+		Barcode:   ProductCreateRequest.Barcode,
+		Price:     ProductCreateRequest.Price,
+		Stock:     0,
+		TagId:     ProductCreateRequest.TagId,
+		ImagePath: strconv.Itoa(int(ProductCreateRequest.Barcode)) + ".jpg",
 	}
 
 	createdProduct, err := ProductService.CreateProduct(&product)
@@ -384,7 +397,7 @@ func CreateProduct(c *gin.Context){
 
 		tagMap = model.TagMap{
 			ProductID: int64(createdProduct.ID),
-			TagID: int64(tag.ID),
+			TagID:     int64(tag.ID),
 		}
 		_, err = TagMapService.CreateTagMap(&tagMap)
 		if err != nil {
@@ -418,15 +431,15 @@ func BuyProducts(c *gin.Context) {
 
 	// リクエストの商品情報をデータベースの型へ変換
 	payment := model.Payment{
-		Price: totalPrice,
-		PayAt: ProductsBuyRequest.PayAt,
+		Price:  totalPrice,
+		PayAt:  ProductsBuyRequest.PayAt,
 		Method: ProductsBuyRequest.Method,
 		UserId: 0,
 	}
 
 	user := model.User{}
 	// ユーザバーコードがリクエストに含まれる場合ユーザIDを取得
-	if(payment.Method == "card" && ProductsBuyRequest.UserNumber != ""){
+	if payment.Method == "card" && ProductsBuyRequest.UserNumber != "" {
 		user, err = UserService.GetUserByBarcode(ProductsBuyRequest.UserNumber)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get user by barcode")
@@ -462,11 +475,11 @@ func BuyProducts(c *gin.Context) {
 		}
 
 		productLog := model.ProductLog{
-			SourceId: paymentId,
+			SourceId:  paymentId,
 			ProductId: productJson.Id,
-			Quantity: productJson.Quantity,
+			Quantity:  productJson.Quantity,
 			UnitPrice: productJson.UnitPrice,
-			Stock: productInfo.Stock - productJson.Quantity,
+			Stock:     productInfo.Stock - productJson.Quantity,
 		}
 
 		// 商品ログをDBへ保存
@@ -484,7 +497,7 @@ func BuyProducts(c *gin.Context) {
 	}
 
 	// お金を減らす
-	if(payment.Method == "card" && ProductsBuyRequest.UserNumber != ""){
+	if payment.Method == "card" && ProductsBuyRequest.UserNumber != "" {
 		// カード支払いの時
 		// ユーザのDebtを減らす
 		err = UserService.IncreaseUserDebt(payment.UserId, 0-totalPrice)
@@ -493,7 +506,7 @@ func BuyProducts(c *gin.Context) {
 			return
 		}
 		// 商店のDebtを減らす
-		err = AssetService.IncreaseDebt(0-totalPrice)
+		err = AssetService.IncreaseDebt(0 - totalPrice)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease debt")
 			return
@@ -508,7 +521,6 @@ func BuyProducts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, "success")
-
 }
 
 // 商品入荷API
@@ -526,7 +538,7 @@ func ArriveProducts(c *gin.Context) {
 	// 購入情報を登録
 	// リクエストの商品情報をデータベースの型へ変換
 	arrival := model.Arrival{
-		Money: ProductsArriveRequest.Money,
+		Money:    ProductsArriveRequest.Money,
 		ArriveAt: ProductsArriveRequest.ArriveAt,
 	}
 	// DBへ保存
@@ -548,11 +560,11 @@ func ArriveProducts(c *gin.Context) {
 		}
 		// リクエストの商品情報をデータベースの型へ変換
 		product := model.ProductLog{
-			SourceId: arrivalId,
+			SourceId:  arrivalId,
 			ProductId: productJson.Id,
-			Quantity: productJson.Quantity,
+			Quantity:  productJson.Quantity,
 			UnitPrice: productInfo.Price,
-			Stock: productInfo.Stock + productJson.Quantity,
+			Stock:     productInfo.Stock + productJson.Quantity,
 		}
 		// 入荷商品情報をDBへ保存DBへ保存
 		err = ProductService.CreateProductLog(&product)
@@ -570,7 +582,7 @@ func ArriveProducts(c *gin.Context) {
 	}
 
 	// お金を減らす
-	err = AssetService.IncreaseMoney(0-ProductsArriveRequest.Money)
+	err = AssetService.IncreaseMoney(0 - ProductsArriveRequest.Money)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
 		return
@@ -594,14 +606,14 @@ func UpdateProduct(c *gin.Context) {
 
 	// 現在の商品情報を取得
 	product, err := ProductService.GetProductById(ProductUpdateRequest.Id)
-	if (err != nil) {
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "product not found")
-    return
+		return
 	}
 
 	// 値が存在するフィールドのみ更新
 	if ProductUpdateRequest.Name != nil {
-		product.Name = *ProductUpdateRequest.Name	// nilでない場合のみ更新
+		product.Name = *ProductUpdateRequest.Name // nilでない場合のみ更新
 	}
 	if ProductUpdateRequest.Barcode != nil {
 		product.Barcode = *ProductUpdateRequest.Barcode
@@ -635,9 +647,8 @@ func UpdateProduct(c *gin.Context) {
 	// タグマップの保存
 	if ProductUpdateRequest.Tags != nil {
 		// 現在のタグマップを削除
-		err = TagMapService.DeleteTagMapByProductId(ProductUpdateRequest.Id)
-		reqTags := []model.TagPostRequestTag{}
-		reqTags = *ProductUpdateRequest.Tags
+		TagMapService.DeleteTagMapByProductId(ProductUpdateRequest.Id)
+		reqTags := *ProductUpdateRequest.Tags
 		for _, tagMap := range reqTags {
 			// タグ名からタグの取得
 			tmpTag, err := TagService.GetTagByName(*tagMap.Name)
@@ -653,13 +664,13 @@ func UpdateProduct(c *gin.Context) {
 			}
 		}
 	}
-	
+
 	productLog := model.ProductLog{
-		SourceId: -1,
+		SourceId:  -1,
 		ProductId: int64(product.ID),
-		Quantity: -1,
+		Quantity:  -1,
 		UnitPrice: product.Price,
-		Stock: product.Stock,
+		Stock:     product.Stock,
 	}
 	// 入荷商品情報をDBへ保存DBへ保存
 	err = ProductService.CreateProductLog(&productLog)
@@ -718,7 +729,6 @@ func DeletePayment(c *gin.Context) {
 		return
 	}
 
-
 	// 購入情報削除
 	// DBへ保存
 	err = ProductService.DeletePayment(paymentId)
@@ -727,9 +737,9 @@ func DeletePayment(c *gin.Context) {
 		return
 	}
 
-	if(payment.Method == "card"){
+	if payment.Method == "card" {
 		// ユーザ残高を増やす
-		err = UserService.IncreaseUserDebt(payment.UserId,payment.Price)
+		err = UserService.IncreaseUserDebt(payment.UserId, payment.Price)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase user debt")
 			return
@@ -740,15 +750,15 @@ func DeletePayment(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase debt")
 			return
 		}
-	}else {
+	} else {
 		// お金を減らす
-		err = AssetService.IncreaseMoney(0-payment.Price)
+		err = AssetService.IncreaseMoney(0 - payment.Price)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
 			return
 		}
 	}
-	
+
 	// 在庫を増やす
 	for _, productLog := range productLogs {
 		err = ProductService.IncreaseStock(productLog.ProductId, productLog.Quantity)

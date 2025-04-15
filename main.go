@@ -16,7 +16,6 @@ import (
 )
 
 func main() {
-
 	// 環境変数の設定
 	os.Setenv("DB_FILE_NAME", "kajilabstore.db")
 	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "kajilab-store-256c6c01f9cb.json")
@@ -35,7 +34,6 @@ func main() {
 	log.Println("Start Server")
 	SetUpServer().Run(":8080")
 	// v1.GET("/list/simultaneous/:user_id", controller.SimultaneousStayUserList
-	
 }
 
 func SetUpServer() *gin.Engine {
@@ -44,7 +42,7 @@ func SetUpServer() *gin.Engine {
 	// engine.Use(middleware.RecordUaAndTime)
 	// CRUD 書籍
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*", "http://localhost:3000"},
+		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders: []string{
 			"Access-Control-Allow-Credentials",
@@ -92,7 +90,7 @@ func SetUpServer() *gin.Engine {
 
 		versionEngine.GET("/storage", controller.GetStorage)
 
-		//versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
+		// versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
 
 	}
 

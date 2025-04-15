@@ -3,10 +3,11 @@ package service
 import (
 	"errors"
 	"fmt"
-	"kajilab-store-backend/model"
 	"os"
 	"strconv"
 	"time"
+
+	"kajilab-store-backend/model"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ import (
 type ProductService struct{}
 
 // 全ての商品を取得する
-func (ProductService) GetAllProducts(limit int64, offset int64, updateDays int64) ([]model.Product, error){
+func (ProductService) GetAllProducts(limit int64, offset int64, updateDays int64) ([]model.Product, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -48,8 +49,34 @@ func (ProductService) GetAllProducts(limit int64, offset int64, updateDays int64
 	return products, nil
 }
 
+func (ProductService) CountProducts(updateDays int64) (int64, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	q := db
+	if updateDays != 0 {
+		fromDate := time.Now().AddDate(0, 0, -int(updateDays))
+		q = q.Where("updated_at > ? OR stock > ?", fromDate, 0)
+	}
+	var count int64
+	result := q.Model(&model.Product{}).Count(&count)
+	if result.Error != nil {
+		fmt.Printf("商品数取得失敗 %v", result.Error)
+		return 0, result.Error
+	}
+	return count, nil
+}
+
 // バーコードから商品情報取得
-func (ProductService) GetProductByBarcode (barcode int64) (model.Product, error) {
+func (ProductService) GetProductByBarcode(barcode int64) (model.Product, error) {
 	product := model.Product{}
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
@@ -72,7 +99,7 @@ func (ProductService) GetProductByBarcode (barcode int64) (model.Product, error)
 }
 
 // 購入ログを取得
-func (ProductService) GetBuyLogs(limit int64, year int64, month int64) ([]model.Payment, error){
+func (ProductService) GetBuyLogs(limit int64, year int64, month int64) ([]model.Payment, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -95,7 +122,7 @@ func (ProductService) GetBuyLogs(limit int64, year int64, month int64) ([]model.
 	if month != 0 {
 		db = db.Where("strftime('%m', pay_at, 'localtime') = ?", fmt.Sprintf("%02d", month))
 	}
-	//result := db.Order("name").Find(&products)
+	// result := db.Order("name").Find(&products)
 	result := db.Order("ID desc").Find(&logs)
 	if result.Error != nil {
 		fmt.Printf("購入履歴取得失敗 %v", result.Error)
@@ -105,7 +132,7 @@ func (ProductService) GetBuyLogs(limit int64, year int64, month int64) ([]model.
 }
 
 // ユーザIDから購入ログを取得
-func (ProductService) GetBuyLogsByUserId(offset int64, limit int64, userId int64) ([]model.Payment, error){
+func (ProductService) GetBuyLogsByUserId(offset int64, limit int64, userId int64) ([]model.Payment, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -118,7 +145,7 @@ func (ProductService) GetBuyLogsByUserId(offset int64, limit int64, userId int64
 	defer sqlDB.Close()
 
 	logs := make([]model.Payment, 0)
-	//result := db.Order("name").Find(&products)
+	// result := db.Order("name").Find(&products)
 	result := db.Where("user_id = ?", int(userId)).Order("ID desc").Offset(int(offset)).Limit(int(limit)).Find(&logs)
 	if result.Error != nil {
 		fmt.Printf("購入履歴取得失敗 %v", result.Error)
@@ -149,7 +176,7 @@ func (ProductService) GetProductById(id int64) (model.Product, error) {
 	return product, nil
 }
 
-func (ProductService) GetProductLogsByDay(day int64, productId int64) ([]model.ProductLog, error){
+func (ProductService) GetProductLogsByDay(day int64, productId int64) ([]model.ProductLog, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -161,7 +188,7 @@ func (ProductService) GetProductLogsByDay(day int64, productId int64) ([]model.P
 	}
 	defer sqlDB.Close()
 
-	dayAgo := time.Now().Add((0-time.Duration(day)) * 24 * time.Hour)
+	dayAgo := time.Now().Add((0 - time.Duration(day)) * 24 * time.Hour)
 	logs := make([]model.ProductLog, 0)
 	result := db.Where("created_at >= ?", dayAgo).Find(&logs)
 	if result.Error != nil {
@@ -201,7 +228,7 @@ func (ProductService) GetProductLogsByDay(day int64, productId int64) ([]model.P
 // }
 
 // 入荷ログを取得
-func (ProductService) GetArriveLogs(limit int64) ([]model.Arrival, error){
+func (ProductService) GetArriveLogs(limit int64) ([]model.Arrival, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -283,7 +310,7 @@ func (ProductService) GetProductsValuesByDay(day int64) ([]int64, error) {
 	// 現在の商品価値総額を取得
 	currentProductsValue := int64(0)
 	products := make([]model.Product, 0)
-	//result := db.Order("name").Find(&products)
+	// result := db.Order("name").Find(&products)
 	result := db.Find(&products)
 	if result.Error != nil {
 		fmt.Printf("商品取得失敗 %v", result.Error)
@@ -294,7 +321,7 @@ func (ProductService) GetProductsValuesByDay(day int64) ([]int64, error) {
 	}
 
 	// 商品価値履歴を取得
-	for i:=0; i<=int(day); i++ {
+	for i := 0; i <= int(day); i++ {
 		productLogs := make([]model.ProductLog, 0)
 		dayAgo := time.Now().AddDate(0, 0, -i)
 		startOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 0, 0, 0, 0, dayAgo.Location())
@@ -308,12 +335,12 @@ func (ProductService) GetProductsValuesByDay(day int64) ([]int64, error) {
 		}
 		// 一日分のログの商品価値情報をvaluesByDayに追加
 		for _, productLog := range productLogs {
-			if (productLog.SourceId >= 200000000000) {
+			if productLog.SourceId >= 200000000000 {
 				// 入荷の場合
-				currentProductsValue -= productLog.UnitPrice*productLog.Quantity
+				currentProductsValue -= productLog.UnitPrice * productLog.Quantity
 			} else {
 				// 購入の場合
-				currentProductsValue += productLog.UnitPrice*productLog.Quantity
+				currentProductsValue += productLog.UnitPrice * productLog.Quantity
 			}
 		}
 	}
@@ -344,7 +371,7 @@ func (ProductService) CreateProduct(product *model.Product) (*model.Product, err
 	result := db.Where("barcode = ?", product.Barcode).First(&existProduct)
 	if result.Error == nil {
 		err := errors.New("the barcode is existing")
-		fmt.Printf("%v",err)
+		fmt.Printf("%v", err)
 		return nil, err
 	}
 
@@ -354,7 +381,7 @@ func (ProductService) CreateProduct(product *model.Product) (*model.Product, err
 		fmt.Printf("商品登録失敗 %v", result.Error)
 		return nil, result.Error
 	}
-	return product,nil
+	return product, nil
 }
 
 // 購入情報を登録
@@ -362,7 +389,7 @@ func (ProductService) CreatePayment(payment *model.Payment) (int64, error) {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
-		return 0,err
+		return 0, err
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
@@ -374,13 +401,12 @@ func (ProductService) CreatePayment(payment *model.Payment) (int64, error) {
 	result := db.Create(payment)
 	if result.Error != nil {
 		fmt.Printf("購入情報登録失敗 %v", result.Error)
-		return 0,result.Error
+		return 0, result.Error
 	}
-	return int64(payment.ID),nil
+	return int64(payment.ID), nil
 }
 
-
-func (ProductService) CreateProductLog(productLog *model.ProductLog) (error) {
+func (ProductService) CreateProductLog(productLog *model.ProductLog) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -418,13 +444,13 @@ func (ProductService) CreateArrival(arrival *model.Arrival) (int64, error) {
 	result := db.Create(arrival)
 	if result.Error != nil {
 		fmt.Printf("入荷情報登録失敗 %v", result.Error)
-		return 0,result.Error
+		return 0, result.Error
 	}
 	return int64(arrival.ID), nil
 }
 
 // 商品情報の更新
-func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
+func (ProductService) UpdateProduct(id int64, product *model.Product) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -447,7 +473,7 @@ func (ProductService) UpdateProduct(id int64,product *model.Product) (error) {
 }
 
 // 商品画像パスの更新
-func (ProductService) UpdateProductImagePath(id int64, imagePath string) (error) {
+func (ProductService) UpdateProductImagePath(id int64, imagePath string) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -469,7 +495,7 @@ func (ProductService) UpdateProductImagePath(id int64, imagePath string) (error)
 }
 
 // 購入情報の削除
-func (ProductService) DeletePayment(id int64) (error) {
+func (ProductService) DeletePayment(id int64) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -499,7 +525,7 @@ func (ProductService) DeletePayment(id int64) (error) {
 }
 
 // 入荷情報の削除
-func (ProductService) DeleteArrival(id int64) (error) {
+func (ProductService) DeleteArrival(id int64) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -528,7 +554,7 @@ func (ProductService) DeleteArrival(id int64) (error) {
 }
 
 // 在庫を増やす
-func (ProductService) IncreaseStock(productId int64, quantity int64)(error) {
+func (ProductService) IncreaseStock(productId int64, quantity int64) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -548,7 +574,7 @@ func (ProductService) IncreaseStock(productId int64, quantity int64)(error) {
 		return result.Error
 	}
 	// 在庫情報を更新
-	result = db.Model(&model.Product{}).Where("id = ?", productId).Update("stock", product.Stock + quantity)
+	result = db.Model(&model.Product{}).Where("id = ?", productId).Update("stock", product.Stock+quantity)
 	if result.Error != nil {
 		fmt.Printf("在庫更新失敗 %v", result.Error)
 		return result.Error
@@ -557,7 +583,7 @@ func (ProductService) IncreaseStock(productId int64, quantity int64)(error) {
 }
 
 // 商品ログを取得
-func (ProductService) GetProductLogsBySourceId(sourceId int64)([]model.ProductLog, error) {
+func (ProductService) GetProductLogsBySourceId(sourceId int64) ([]model.ProductLog, error) {
 	productLogs := []model.ProductLog{}
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
