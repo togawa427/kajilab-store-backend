@@ -88,6 +88,9 @@ func SetUpServer() *gin.Engine {
 		versionEngine.GET("/tags", controller.GetTags)
 		versionEngine.POST("/tags", controller.CreateTag)
 
+		// sale
+		versionEngine.GET("/sales", controller.GetMonthSales)
+
 		versionEngine.GET("/storage", controller.GetStorage)
 
 		// versionEngine.GET("/products/:product_id", controller.GetProductByProductId)
