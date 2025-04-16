@@ -4,7 +4,8 @@ type GetSalesResponse struct {
 	Year           int64                         `json:"year"`
 	Month          int64                         `json:"month"`
 	TotalMonthSale int64                         `json:"total_month_sale"`
-	Sales          []GetSalesResponsePaymentsDay `json:"name"`
+	ResponseDate   string                        `json:"response_date"`
+	Sales          []GetSalesResponsePaymentsDay `json:"sales"`
 }
 
 type GetSalesResponsePaymentsDay struct {

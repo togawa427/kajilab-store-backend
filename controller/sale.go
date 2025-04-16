@@ -128,6 +128,7 @@ func GetMonthSales(c *gin.Context) {
 		Year:           year,
 		Month:          month,
 		TotalMonthSale: salesMonth,
+		ResponseDate:   time.Now().Format(time.DateTime),
 		Sales:          resPaymentsPerDay,
 	}
 
