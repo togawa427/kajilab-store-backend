@@ -2,9 +2,10 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+
 	"kajilab-store-backend/model"
 	"kajilab-store-backend/service"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,9 +22,9 @@ func GetUserByBarcode(c *gin.Context) {
 	}
 	// レスポンスの型に変換
 	userResponse := model.UserGetResponse{
-		Id: int64(user.ID),
-		Name: user.Name,
-		Debt: user.Debt,
+		Id:      int64(user.ID),
+		Name:    user.Name,
+		Debt:    user.Debt,
 		Barcode: user.Barcode,
 	}
 
@@ -42,11 +43,11 @@ func CreateUser(c *gin.Context) {
 
 	// リクエストの商品情報をデータベースの型へ変換
 	user := model.User{
-		Name: UserCreateRequest.Name,
-		Debt: 0,
+		Name:    UserCreateRequest.Name,
+		Debt:    0,
 		Barcode: UserCreateRequest.Barcode,
 	}
-	
+
 	err = UserService.CreateUser(&user)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal create product")
@@ -77,9 +78,9 @@ func UpdateUserDebt(c *gin.Context) {
 
 	// ユーザ情報の更新
 	user := model.User{
-		Name: "",	// 変更しない
-		Debt: UserUpdateDebtRequest.Debt,
-		Barcode: "",	// 変更しない
+		Name:    beforeUser.Name,
+		Debt:    UserUpdateDebtRequest.Debt,
+		Barcode: "", // 変更しない
 	}
 	err = UserService.UpdateUser(UserUpdateDebtRequest.Id, &user)
 	if err != nil {
@@ -114,9 +115,9 @@ func UpdateUserBarcode(c *gin.Context) {
 	}
 
 	user := model.User{
-		Name: "",	// 変更しない
-		Debt: 0,	// 変更しない
-		Barcode: UserUpdateBarcodeRequest.Barcode,	// 変更しない
+		Name:    "",                               // 変更しない
+		Debt:    0,                                // 変更しない
+		Barcode: UserUpdateBarcodeRequest.Barcode, // 変更しない
 	}
 
 	err = UserService.UpdateUser(UserUpdateBarcodeRequest.Id, &user)
