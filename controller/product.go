@@ -527,6 +527,7 @@ func BuyProducts(c *gin.Context) {
 func ArriveProducts(c *gin.Context) {
 	ProductService := service.ProductService{}
 	AssetService := service.AssetService{}
+	UserService := service.UserService{}
 	ProductsArriveRequest := model.ProductsArriveRequest{}
 	err := c.Bind(&ProductsArriveRequest)
 	if err != nil {
@@ -586,6 +587,27 @@ func ArriveProducts(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease money")
 		return
+	}
+
+	// 仕入れ金額の3%を梶研Pay残高に追加
+	if ProductsArriveRequest.UserBarcode != nil {
+		// product.Name = *ProductUpdateRequest.Name // nilでない場合のみ更新
+		user, err := UserService.GetUserByBarcode(*ProductsArriveRequest.UserBarcode)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get user by barcode")
+			return
+		}
+		err = UserService.IncreaseUserDebt(int64(user.ID), int64(float64(ProductsArriveRequest.Money)*0.03))
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase kajilabpay debt")
+			return
+		}
+		// 商店のDebtを増やす
+		err = AssetService.IncreaseDebt(int64(float64(ProductsArriveRequest.Money) * 0.03))
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase debt")
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, "success")

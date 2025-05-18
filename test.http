@@ -3,7 +3,7 @@
 # @baseURL=https://kjlbstore-backend.kajilab.dev
 
 ###
-Get {{baseURL}}/api/v1/products?limit=100&&offset=0&&updated_days=2
+Get {{baseURL}}/api/v1/products?limit=100&&offset=0&&updated_days=10
 
 ###a
 GET {{baseURL}}/api/v1/products/4901071239824
@@ -96,7 +96,8 @@ Content-Type: application/json
 
 {
     "arrive_at": "2024-02-10T23:32:37.115934+09:00",
-    "money": 2010,
+    "money": 1555,
+    "user_barcode": "1080123456788",
     "products": [
         {
             "id": 2,
@@ -135,6 +136,16 @@ Content-Type: application/json
     "barcode": 4897036691012,
     "stock":0
 }
+
+###
+PUT {{baseURL}}/api/v1/products
+Content-Type: application/json
+
+{
+    "id":55,
+    "tags": [{"name": "お菓子"}]
+}
+
 
 # 在庫0で更新できるようにしたいな
 ###
@@ -235,10 +246,17 @@ Content-Type: application/json
 
 {
     "tag": {
-        "name": "ドリンク"
+        "name": "カップ麺"
     }
 }
 
+
+#=========================================
+# sales
+#=========================================
+
+###
+Get {{baseURL}}/api/v1/sales?year=2024&&month=8
 
 #=========================================
 # storages

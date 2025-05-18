@@ -97,9 +97,10 @@ type ProductBuyJson struct {
 }
 
 type ProductsArriveRequest struct {
-	ArriveAt time.Time           `json:"arrive_at"`
-	Money    int64               `json:"money"`
-	Products []ProductArriveJson `json:"products"`
+	ArriveAt    time.Time           `json:"arrive_at"`
+	Money       int64               `json:"money"`
+	UserBarcode *string             `json:"user_barcode"`
+	Products    []ProductArriveJson `json:"products"`
 }
 
 type ProductArriveJson struct {
