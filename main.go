@@ -110,6 +110,7 @@ func UpdateDatabase() {
 	db.AutoMigrate(&model.Product{})
 	db.AutoMigrate(&model.Tag{})
 	db.AutoMigrate(&model.TagMap{})
+	db.AutoMigrate(&model.Arrival{})
 }
 
 func SetUpDatabase() {

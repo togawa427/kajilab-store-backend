@@ -541,6 +541,14 @@ func ArriveProducts(c *gin.Context) {
 	arrival := model.Arrival{
 		Money:    ProductsArriveRequest.Money,
 		ArriveAt: ProductsArriveRequest.ArriveAt,
+		UserId:   0,
+	}
+	if ProductsArriveRequest.UserBarcode != nil {
+		user, err := UserService.GetUserByBarcode(*ProductsArriveRequest.UserBarcode)
+		if err == nil {
+			// もしユーザが見つかったら仕入れ情報にユーザIDを追加
+			arrival.UserId = int64(user.ID)
+		}
 	}
 	// DBへ保存
 	arrivalId, err := ProductService.CreateArrival(&arrival)
@@ -589,21 +597,22 @@ func ArriveProducts(c *gin.Context) {
 		return
 	}
 
-	// 仕入れ金額の3%を梶研Pay残高に追加
+	// 仕入れ金額の4%を梶研Pay残高に追加
 	if ProductsArriveRequest.UserBarcode != nil {
 		// product.Name = *ProductUpdateRequest.Name // nilでない場合のみ更新
 		user, err := UserService.GetUserByBarcode(*ProductsArriveRequest.UserBarcode)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get user by barcode")
+			// バーコードからユーザが見つからない場合
+			c.JSON(http.StatusOK, "success but featal get user barcode")
 			return
 		}
-		err = UserService.IncreaseUserDebt(int64(user.ID), int64(float64(ProductsArriveRequest.Money)*0.03))
+		err = UserService.IncreaseUserDebt(int64(user.ID), int64(float64(ProductsArriveRequest.Money)*0.04))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase kajilabpay debt")
 			return
 		}
 		// 商店のDebtを増やす
-		err = AssetService.IncreaseDebt(int64(float64(ProductsArriveRequest.Money) * 0.03))
+		err = AssetService.IncreaseDebt(int64(float64(ProductsArriveRequest.Money) * 0.04))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase debt")
 			return
@@ -837,6 +846,27 @@ func DeleteArrival(c *gin.Context) {
 			return
 		}
 	}
+	// 担当者の梶研Pay残高減少
+	// 仕入れ金額の3%を梶研Pay残高に追加
+	// if arrival.UserBarcode != nil {
+	// 	// product.Name = *ProductUpdateRequest.Name // nilでない場合のみ更新
+	// 	user, err := UserService.GetUserByBarcode(*ProductsArriveRequest.UserBarcode)
+	// 	if err != nil {
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get user by barcode")
+	// 		return
+	// 	}
+	// 	err = UserService.IncreaseUserDebt(int64(user.ID), int64(float64(ProductsArriveRequest.Money)*0.03))
+	// 	if err != nil {
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase kajilabpay debt")
+	// 		return
+	// 	}
+	// 	// 商店のDebtを増やす
+	// 	err = AssetService.IncreaseDebt(int64(float64(ProductsArriveRequest.Money) * 0.03))
+	// 	if err != nil {
+	// 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase debt")
+	// 		return
+	// 	}
+	// }
 
 	c.JSON(http.StatusOK, "success")
 }
