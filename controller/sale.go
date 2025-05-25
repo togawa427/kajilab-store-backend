@@ -69,7 +69,7 @@ func GetMonthSales(c *gin.Context) {
 		}
 
 		// 購入物の支払い日時を取得
-		indexPaymentByDay := findPaymentByDay(resPaymentsPerDay, int64(log.PayAt.Day()))
+		indexPaymentByDay := findPaymentByDay(resPaymentsPerDay, int64(log.CreatedAt.Day()))
 		if indexPaymentByDay != nil {
 			// 既にその日が存在する場合
 			for _, reqBuyProduct := range reqBuyProducts {
