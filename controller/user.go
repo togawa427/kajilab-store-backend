@@ -89,7 +89,7 @@ func UpdateUserDebt(c *gin.Context) {
 	}
 
 	// 「変更後のユーザの残高　-　変更前のユーザの残高」を商店Debtに足す
-	err = UserService.IncreaseKajilabpayDebt(int64(user.ID), -1, UserUpdateDebtRequest.Debt-beforeUser.Debt, "チャージ")
+	err = UserService.IncreaseKajilabpayDebt(int64(beforeUser.ID), -1, UserUpdateDebtRequest.Debt-beforeUser.Debt, "チャージ")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
 		return

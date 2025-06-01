@@ -500,7 +500,7 @@ func BuyProducts(c *gin.Context) {
 	if payment.Method == "card" && ProductsBuyRequest.UserNumber != "" {
 		// カード支払いの時
 		// ユーザのDebtを減らす
-		err = UserService.IncreaseKajilabpayDebt(payment.UserId, paymentId, 0-totalPrice, "買い物")
+		err = UserService.IncreaseKajilabpayDebt(payment.UserId, paymentId, 0-totalPrice, "購入")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
 			return
