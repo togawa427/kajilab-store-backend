@@ -229,6 +229,7 @@ func GetBuyLogs(c *gin.Context) {
 // ユーザIDから購入ログの取得
 func GetBuyLogsByUser(c *gin.Context) {
 	ProductService := service.ProductService{}
+	UserService := service.UserService{}
 
 	// ユーザID取得
 	userId, err := strconv.ParseInt(c.Param("userId"), 10, 64)
@@ -250,48 +251,79 @@ func GetBuyLogsByUser(c *gin.Context) {
 	}
 
 	// DBから購入ログ取得
-	logs, err := ProductService.GetBuyLogsByUserId(offset, limit, userId)
+
+	kajilabpayLogs, err := UserService.GetKajilabpayLogsByUserId(offset, limit, userId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get logs from DB")
 		return
 	}
 
 	resLogs := []model.BuyLogsGetResponse{}
-	for _, log := range logs {
-
+	for _, kajilabpayLog := range kajilabpayLogs {
 		// 購入物の商品情報を取得
-		buyProducts, err := ProductService.GetProductLogsBySourceId(int64(log.ID))
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproducts from DB")
-			return
-		}
-		buyProductsJson := []model.BuyProductResponse{}
-		for _, buyProduct := range buyProducts {
-
-			// 商品名を取得
-			productInfo, err := ProductService.GetProductById(int64(buyProduct.ProductId))
+		if kajilabpayLog.PaymentId != -1 { // 購入履歴である場合
+			buyProducts, err := ProductService.GetProductLogsBySourceId(int64(kajilabpayLog.PaymentId))
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproduct from DB")
+				c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproducts from DB")
 				return
 			}
+			buyProductsJson := []model.BuyProductResponse{}
 
-			buyProductsJson = append(buyProductsJson, model.BuyProductResponse{
-				Id:        int64(productInfo.ID),
-				Name:      productInfo.Name,
-				Barcode:   productInfo.Barcode,
-				Quantity:  buyProduct.Quantity,
-				UnitPrice: buyProduct.UnitPrice,
+			totalPrice := int64(0)
+			for _, buyProduct := range buyProducts {
+
+				// 商品名を取得
+				productInfo, err := ProductService.GetProductById(int64(buyProduct.ProductId))
+				if err != nil {
+					c.AbortWithStatusJSON(http.StatusBadRequest, "fetal get buyproduct from DB")
+					return
+				}
+
+				buyProductsJson = append(buyProductsJson, model.BuyProductResponse{
+					Id:        int64(productInfo.ID),
+					Name:      productInfo.Name,
+					Barcode:   productInfo.Barcode,
+					Quantity:  buyProduct.Quantity,
+					UnitPrice: buyProduct.UnitPrice,
+				})
+				totalPrice = buyProduct.UnitPrice * buyProduct.Quantity
+			}
+			if kajilabpayLog.PrevDebt == -1 { // 以降前のデータ
+				resLogs = append(resLogs, model.BuyLogsGetResponse{
+					Id:       int64(kajilabpayLog.ID),
+					Price:    totalPrice,
+					PayAt:    kajilabpayLog.UpdatedAt,
+					Method:   "card",
+					UserName: "",
+					Products: buyProductsJson,
+				})
+			} else {
+				resLogs = append(resLogs, model.BuyLogsGetResponse{
+					Id:          int64(kajilabpayLog.ID),
+					Price:       kajilabpayLog.PrevDebt - kajilabpayLog.CurrentDebt,
+					PayAt:       kajilabpayLog.UpdatedAt,
+					Method:      "card",
+					UserName:    "",
+					Content:     kajilabpayLog.Content,
+					PrevDebt:    kajilabpayLog.PrevDebt,
+					CurrentDebt: kajilabpayLog.CurrentDebt,
+					Products:    buyProductsJson,
+				})
+			}
+		} else {
+			// 購入でない場合
+			resLogs = append(resLogs, model.BuyLogsGetResponse{
+				Id:          int64(kajilabpayLog.ID),
+				Price:       kajilabpayLog.PrevDebt - kajilabpayLog.CurrentDebt,
+				PayAt:       kajilabpayLog.UpdatedAt,
+				Method:      "",
+				UserName:    "",
+				Content:     kajilabpayLog.Content,
+				PrevDebt:    kajilabpayLog.PrevDebt,
+				CurrentDebt: kajilabpayLog.CurrentDebt,
+				Products:    make([]model.BuyProductResponse, 0),
 			})
 		}
-
-		resLogs = append(resLogs, model.BuyLogsGetResponse{
-			Id:       int64(log.ID),
-			Price:    log.Price,
-			PayAt:    log.PayAt,
-			Method:   log.Method,
-			UserName: "",
-			Products: buyProductsJson,
-		})
 	}
 
 	c.JSON(http.StatusOK, resLogs)
@@ -307,7 +339,6 @@ func GetArriveLogs(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "limit is not number")
 		return
 	}
-	//
 
 	// 最終的に返す値
 	logsJson := []model.ArriveLogGetResponse{}

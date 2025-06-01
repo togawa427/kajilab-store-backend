@@ -280,3 +280,26 @@ func (UserService) IncreaseKajilabpayDebt(userId int64, paymentId int64, debt in
 
 	return nil
 }
+
+// ユーザIDから購入ログを取得
+func (UserService) GetKajilabpayLogsByUserId(offset int64, limit int64, userId int64) ([]model.KajilabpayLog, error) {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	logs := make([]model.KajilabpayLog, 0)
+	// result := db.Order("name").Find(&products)
+	result := db.Where("user_id = ?", int(userId)).Order("ID desc").Offset(int(offset)).Limit(int(limit)).Find(&logs)
+	if result.Error != nil {
+		fmt.Printf("梶研Pay履歴取得失敗 %v", result.Error)
+		return nil, result.Error
+	}
+	return logs, nil
+}

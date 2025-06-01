@@ -38,13 +38,16 @@ type ProductStockLogJson struct {
 }
 
 type BuyLogsGetResponse struct {
-	Id       int64                `json:"id"`
-	Price    int64                `json:"price"`
-	PayAt    time.Time            `json:"pay_at"`
-	PayAtStr string               `json:"pay_at_str"`
-	Method   string               `json:"method"`
-	UserName string               `json:"user_name"`
-	Products []BuyProductResponse `json:"products"`
+	Id          int64                `json:"id"`
+	Price       int64                `json:"price"`
+	PayAt       time.Time            `json:"pay_at"`
+	PayAtStr    string               `json:"pay_at_str"`
+	Method      string               `json:"method"`
+	UserName    string               `json:"user_name"`
+	Content     string               `json:"content"`
+	PrevDebt    int64                `json:"prev_debt"`
+	CurrentDebt int64                `json:"current_debt"`
+	Products    []BuyProductResponse `json:"products"`
 }
 
 type BuyProductResponse struct {
