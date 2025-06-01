@@ -211,12 +211,6 @@ func (UserService) IsEnoughUserDebt(userId int64, price int64) error {
 	return nil
 }
 
-func (UserService) CreateKajilabPayLog(userId int64, prevDebt int64, currentDebt int64) {
-	// DBに更新前の残高，更新後の残高，UserId，を保存
-
-	//
-}
-
 // 残高を増減させる
 func (UserService) IncreaseKajilabpayDebt(userId int64, paymentId int64, debt int64, content string) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
@@ -230,8 +224,6 @@ func (UserService) IncreaseKajilabpayDebt(userId int64, paymentId int64, debt in
 	}
 	defer sqlDB.Close()
 
-	fmt.Println("1 IncreaseKajilabpayDebt")
-
 	// 現在の残高を取得
 	user := model.User{}
 	result := db.First(&user, userId)
@@ -240,8 +232,6 @@ func (UserService) IncreaseKajilabpayDebt(userId int64, paymentId int64, debt in
 		return result.Error
 	}
 
-	fmt.Println("2 IncreaseKajilabpayDebt")
-
 	// DBのユーザ残高情報を更新
 	result = db.Model(&model.User{}).Where("id = ?", userId).Update("debt", user.Debt+debt)
 	// result = db.Create(&model.Asset{Money: .Money+money, Debt: asset.Debt})
@@ -249,8 +239,6 @@ func (UserService) IncreaseKajilabpayDebt(userId int64, paymentId int64, debt in
 		fmt.Printf("ユーザ残高更新失敗 %v", result.Error)
 		return result.Error
 	}
-
-	fmt.Println("3 IncreaseKajilabpayDebt")
 
 	// 梶研Payの残高履歴を更新
 	// UserId，更新前の残高，更新後の残高，PaymentId，Contentを保存
@@ -266,8 +254,6 @@ func (UserService) IncreaseKajilabpayDebt(userId int64, paymentId int64, debt in
 		fmt.Printf("梶研Pay履歴登録失敗 %v", result.Error)
 		return result.Error
 	}
-
-	fmt.Println("4 IncreaseKajilabpayDebt")
 
 	// = 現在の総財産情報をDBへ登録 =
 	// 現在の財産情報を取得

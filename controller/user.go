@@ -79,8 +79,8 @@ func UpdateUserDebt(c *gin.Context) {
 	// ユーザ情報の更新
 	user := model.User{
 		Name:    beforeUser.Name,
-		Debt:    UserUpdateDebtRequest.Debt,
-		Barcode: "", // 変更しない
+		Debt:    beforeUser.Debt, // 変更しない
+		Barcode: "",              // 変更しない
 	}
 	err = UserService.UpdateUser(UserUpdateDebtRequest.Id, &user)
 	if err != nil {
@@ -89,9 +89,9 @@ func UpdateUserDebt(c *gin.Context) {
 	}
 
 	// 「変更後のユーザの残高　-　変更前のユーザの残高」を商店Debtに足す
-	err = AssetService.IncreaseDebt(UserUpdateDebtRequest.Debt - beforeUser.Debt)
+	err = UserService.IncreaseKajilabpayDebt(int64(user.ID), -1, UserUpdateDebtRequest.Debt-beforeUser.Debt, "チャージ")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal update asset")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
 		return
 	}
 	// 商店残高(money)を増やす

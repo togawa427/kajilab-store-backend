@@ -500,23 +500,11 @@ func BuyProducts(c *gin.Context) {
 	if payment.Method == "card" && ProductsBuyRequest.UserNumber != "" {
 		// カード支払いの時
 		// ユーザのDebtを減らす
-		fmt.Println("kajilabpay")
 		err = UserService.IncreaseKajilabpayDebt(payment.UserId, paymentId, 0-totalPrice, "買い物")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
 			return
 		}
-		// err = UserService.IncreaseUserDebt(payment.UserId, 0-totalPrice)
-		// if err != nil {
-		// 	c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
-		// 	return
-		// }
-		// // 商店のDebtを減らす
-		// err = AssetService.IncreaseDebt(0 - totalPrice)
-		// if err != nil {
-		// 	c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease debt")
-		// 	return
-		// }
 	} else {
 		// 現金支払いの時は商店残高を増やす
 		err = AssetService.IncreaseMoney(totalPrice)
@@ -612,15 +600,9 @@ func ArriveProducts(c *gin.Context) {
 			c.JSON(http.StatusOK, "success but featal get user barcode")
 			return
 		}
-		err = UserService.IncreaseUserDebt(int64(user.ID), int64(float64(ProductsArriveRequest.Money)*0.04))
+		err = UserService.IncreaseKajilabpayDebt(int64(user.ID), -1, int64(float64(ProductsArriveRequest.Money)*0.04), "仕入れのお駄賃")
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase kajilabpay debt")
-			return
-		}
-		// 商店のDebtを増やす
-		err = AssetService.IncreaseDebt(int64(float64(ProductsArriveRequest.Money) * 0.04))
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase debt")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
 			return
 		}
 	}
@@ -775,16 +757,10 @@ func DeletePayment(c *gin.Context) {
 	}
 
 	if payment.Method == "card" {
-		// ユーザ残高を増やす
-		err = UserService.IncreaseUserDebt(payment.UserId, payment.Price)
+		// ユーザ残高，商店残高(debt)を増やす
+		err = UserService.IncreaseKajilabpayDebt(payment.UserId, paymentId, payment.Price, "返金")
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase user debt")
-			return
-		}
-		// 商店残高(debt)を増やす
-		err = AssetService.IncreaseDebt(payment.Price)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal increase debt")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
 			return
 		}
 	} else {

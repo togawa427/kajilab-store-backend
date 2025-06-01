@@ -2,9 +2,10 @@ package service
 
 import (
 	"fmt"
-	"kajilab-store-backend/model"
 	"os"
 	"time"
+
+	"kajilab-store-backend/model"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -12,9 +13,8 @@ import (
 
 type AssetService struct{}
 
-
 // お金を増減させる
-func (AssetService) IncreaseMoney(money int64) (error) {
+func (AssetService) IncreaseMoney(money int64) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -25,7 +25,6 @@ func (AssetService) IncreaseMoney(money int64) (error) {
 		fmt.Println(err)
 	}
 	defer sqlDB.Close()
-	
 
 	// 現在のお金を取得
 	asset := model.Asset{}
@@ -36,40 +35,8 @@ func (AssetService) IncreaseMoney(money int64) (error) {
 	}
 
 	// DBへ更新
-	//result = db.Model(&model.Asset{}).Where("id = 1").Update("money", asset.Money + money)
-	result = db.Create(&model.Asset{Money: asset.Money+money, Debt: asset.Debt})
-	if result.Error != nil {
-		fmt.Printf("財産更新失敗 %v", result.Error)
-		return result.Error
-	}
-	return nil
-}
-
-// 残高を増減させる
-func (AssetService) IncreaseDebt(debt int64) (error) {
-	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	sqlDB, err := db.DB()
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer sqlDB.Close()
-	
-
-	// 現在のお金を取得
-	asset := model.Asset{}
-	result := db.Last(&asset)
-	if result.Error != nil {
-		fmt.Printf("財産取得失敗 %v", result.Error)
-		return result.Error
-	}
-
-	// DBへ更新
-	//result = db.Model(&model.Asset{}).Where("id = 1").Update("money", asset.Money + money)
-	result = db.Create(&model.Asset{Money: asset.Money, Debt: asset.Debt+debt})
+	// result = db.Model(&model.Asset{}).Where("id = 1").Update("money", asset.Money + money)
+	result = db.Create(&model.Asset{Money: asset.Money + money, Debt: asset.Debt})
 	if result.Error != nil {
 		fmt.Printf("財産更新失敗 %v", result.Error)
 		return result.Error
@@ -117,7 +84,7 @@ func (AssetService) GetAssetHistory(day int64) ([]model.Asset, error) {
 
 	assets := make([]model.Asset, 0)
 	// 現在の予算をDBから取得
-	for i:=0; i<=int(day); i++ {
+	for i := 0; i <= int(day); i++ {
 		asset := model.Asset{}
 		dayAgo := time.Now().AddDate(0, 0, 0-(int(day)-i))
 		startOfDay := time.Date(dayAgo.Year(), dayAgo.Month(), dayAgo.Day(), 0, 0, 0, 0, dayAgo.Location())
@@ -126,12 +93,12 @@ func (AssetService) GetAssetHistory(day int64) ([]model.Asset, error) {
 		if result.Error != nil {
 			assets = append(assets, model.Asset{
 				Money: -1,
-				Debt: -1,
+				Debt:  -1,
 			})
 		} else {
 			assets = append(assets, model.Asset{
 				Money: asset.Money,
-				Debt: asset.Debt,
+				Debt:  asset.Debt,
 			})
 		}
 	}
@@ -140,7 +107,7 @@ func (AssetService) GetAssetHistory(day int64) ([]model.Asset, error) {
 }
 
 // 財産を更新する
-func (AssetService) UpdateAsset(asset *model.Asset) (error) {
+func (AssetService) UpdateAsset(asset *model.Asset) error {
 	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
@@ -153,7 +120,7 @@ func (AssetService) UpdateAsset(asset *model.Asset) (error) {
 	defer sqlDB.Close()
 
 	// 財産情報をDBへ登録
-	result := db.Create(asset) 
+	result := db.Create(asset)
 	if result.Error != nil {
 		fmt.Printf("商品情報更新失敗 %v", result.Error)
 		return result.Error
