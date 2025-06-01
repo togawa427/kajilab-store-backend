@@ -111,6 +111,7 @@ func UpdateDatabase() {
 	db.AutoMigrate(&model.Tag{})
 	db.AutoMigrate(&model.TagMap{})
 	db.AutoMigrate(&model.Arrival{})
+	db.AutoMigrate(&model.KajilabpayLog{})
 }
 
 func SetUpDatabase() {
@@ -131,6 +132,7 @@ func SetUpDatabase() {
 	db.AutoMigrate(&model.ProductLog{})
 	db.AutoMigrate(&model.Tag{})
 	db.AutoMigrate(&model.TagMap{})
+	db.AutoMigrate(&model.KajilabpayLog{})
 
 	// サンプルデータの挿入
 	db.Create(&model.Product{Name: "じゃがりこサラダ味", Barcode: 134912341234, Price: 120, Stock: 9, TagId: 1, ImagePath: "public/images/jagariko.jpg"})

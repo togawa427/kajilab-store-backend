@@ -210,3 +210,87 @@ func (UserService) IsEnoughUserDebt(userId int64, price int64) error {
 	}
 	return nil
 }
+
+func (UserService) CreateKajilabPayLog(userId int64, prevDebt int64, currentDebt int64) {
+	// DBに更新前の残高，更新後の残高，UserId，を保存
+
+	//
+}
+
+// 残高を増減させる
+func (UserService) IncreaseKajilabpayDebt(userId int64, paymentId int64, debt int64, content string) error {
+	db, err := gorm.Open(sqlite.Open(os.Getenv("DB_FILE_NAME")), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer sqlDB.Close()
+
+	fmt.Println("1 IncreaseKajilabpayDebt")
+
+	// 現在の残高を取得
+	user := model.User{}
+	result := db.First(&user, userId)
+	if result.Error != nil {
+		fmt.Printf("ユーザ残高取得失敗 %v", result.Error)
+		return result.Error
+	}
+
+	fmt.Println("2 IncreaseKajilabpayDebt")
+
+	// DBのユーザ残高情報を更新
+	result = db.Model(&model.User{}).Where("id = ?", userId).Update("debt", user.Debt+debt)
+	// result = db.Create(&model.Asset{Money: .Money+money, Debt: asset.Debt})
+	if result.Error != nil {
+		fmt.Printf("ユーザ残高更新失敗 %v", result.Error)
+		return result.Error
+	}
+
+	fmt.Println("3 IncreaseKajilabpayDebt")
+
+	// 梶研Payの残高履歴を更新
+	// UserId，更新前の残高，更新後の残高，PaymentId，Contentを保存
+	kajilabpayLog := model.KajilabpayLog{
+		UserId:      userId,
+		PrevDebt:    user.Debt,
+		CurrentDebt: user.Debt + debt,
+		PaymentId:   paymentId,
+		Content:     content,
+	}
+	result = db.Create(&kajilabpayLog)
+	if result.Error != nil {
+		fmt.Printf("梶研Pay履歴登録失敗 %v", result.Error)
+		return result.Error
+	}
+
+	fmt.Println("4 IncreaseKajilabpayDebt")
+
+	// = 現在の総財産情報をDBへ登録 =
+	// 現在の財産情報を取得
+	asset := model.Asset{}
+	result = db.Last(&asset)
+	if result.Error != nil {
+		fmt.Printf("残高取得失敗 %v", result.Error)
+		return result.Error
+	}
+	newAsset := model.Asset{
+		Money: asset.Money,
+		Debt:  asset.Debt + debt,
+	}
+	// 残高情報をDBへ保存
+	asset.Debt = asset.Debt + debt
+	result = db.Create(&newAsset)
+	if result.Error != nil {
+		fmt.Printf("残高更新失敗 %v", result.Error)
+		return result.Error
+	}
+
+	// CloudLoggingにログ出力
+	go createCloudLog(user.Name + "(ID: " + strconv.Itoa(int(userId)) + ")" + "の残高\n" + "支払い前：" + strconv.Itoa(int(user.Debt)) + "\n支払い後：" + strconv.Itoa(int(user.Debt+debt)))
+
+	return nil
+}

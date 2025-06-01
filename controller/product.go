@@ -500,17 +500,23 @@ func BuyProducts(c *gin.Context) {
 	if payment.Method == "card" && ProductsBuyRequest.UserNumber != "" {
 		// カード支払いの時
 		// ユーザのDebtを減らす
-		err = UserService.IncreaseUserDebt(payment.UserId, 0-totalPrice)
+		fmt.Println("kajilabpay")
+		err = UserService.IncreaseKajilabpayDebt(payment.UserId, paymentId, 0-totalPrice, "買い物")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
 			return
 		}
-		// 商店のDebtを減らす
-		err = AssetService.IncreaseDebt(0 - totalPrice)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease debt")
-			return
-		}
+		// err = UserService.IncreaseUserDebt(payment.UserId, 0-totalPrice)
+		// if err != nil {
+		// 	c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease user debt")
+		// 	return
+		// }
+		// // 商店のDebtを減らす
+		// err = AssetService.IncreaseDebt(0 - totalPrice)
+		// if err != nil {
+		// 	c.AbortWithStatusJSON(http.StatusBadRequest, "fetal decrease debt")
+		// 	return
+		// }
 	} else {
 		// 現金支払いの時は商店残高を増やす
 		err = AssetService.IncreaseMoney(totalPrice)

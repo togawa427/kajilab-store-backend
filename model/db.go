@@ -81,3 +81,12 @@ type TagMap struct {
 	ProductID int64
 	TagID     int64
 }
+
+type KajilabpayLog struct {
+	gorm.Model
+	UserId      int64
+	PrevDebt    int64
+	CurrentDebt int64
+	PaymentId   int64
+	Content     string
+}
